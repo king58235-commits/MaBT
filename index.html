@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>時之權能：魔界之戰 Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151416;
+      --panel: #242226;
+      --panel-2: #302d33;
+      --line: #4e4853;
+      --text: #f1edf4;
+      --muted: #c2b9c8;
+      --gold: #e8c566;
+      --green: #45b86c;
+      --red: #d84f5f;
+      --blue: #4d8edb;
+      --purple: #9c64dc;
+      --wall: #35323a;
+      --road: #aaa2ad;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) 300px;
+      gap: 18px;
+      padding: 20px;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .badge {
+      min-width: 104px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      text-align: center;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      max-width: 960px;
+      border: 1px solid var(--line);
+      background: #1b191d;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      image-rendering: pixelated;
+      background: #0f0e11;
+      border-radius: 4px;
+    }
+
+    .message {
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    aside {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .stats {
+      display: grid;
+      gap: 8px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+    }
+
+    .stat:last-child {
+      border-bottom: 0;
+    }
+
+    .stat strong {
+      color: var(--text);
+    }
+
+    .hpbar {
+      height: 10px;
+      margin-top: 8px;
+      background: #17151a;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .hpbar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #d84f5f, #e8c566);
+      width: 100%;
+    }
+
+    .controls {
+      display: grid;
+      gap: 8px;
+    }
+
+    .settings-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .setting-row {
+      display: grid;
+      grid-template-columns: 1fr 86px;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .setting-row input {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #17151a;
+      color: var(--text);
+      padding: 6px 8px;
+      font: inherit;
+    }
+
+    dialog {
+      width: min(560px, calc(100vw - 28px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 0;
+    }
+
+    dialog::backdrop {
+      background: rgba(10, 8, 12, 0.65);
+    }
+
+    .dialog-body {
+      padding: 18px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--gold);
+    }
+
+    button.active {
+      outline: 2px solid var(--gold);
+      background: #463d2b;
+    }
+
+    button.primary {
+      background: #315338;
+      border-color: #519662;
+    }
+
+    button.danger {
+      background: #553039;
+      border-color: #9d5360;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      flex: 0 0 auto;
+    }
+
+    .notes {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="stage">
+      <header>
+        <div>
+          <h1>時之權能：魔界之戰</h1>
+          <div class="subtitle">HTML Prototype - 地下城防衛測試版</div>
+        </div>
+        <div class="badge" id="phaseBadge">準備階段</div>
+      </header>
+
+      <div class="canvas-wrap">
+        <canvas id="game" width="800" height="600" aria-label="地下城棋盤"></canvas>
+      </div>
+
+      <div class="message" id="message">先用初始魔素配置史萊姆與地形，準備好後按下開始進攻。</div>
+      <div id="debugState" hidden></div>
+    </section>
+
+    <aside>
+      <section class="panel">
+        <h2>戰況</h2>
+        <div class="stats">
+          <div class="stat"><span>魔素</span><strong id="manaText">140</strong></div>
+          <div class="stat"><span>核心 HP</span><strong id="coreText">120 / 120</strong></div>
+          <div class="hpbar"><span id="coreBar"></span></div>
+          <div class="stat"><span>敵人生成</span><strong id="spawnText">0 / 22</strong></div>
+          <div class="stat"><span>場上敵人</span><strong id="enemyText">0</strong></div>
+          <div class="stat"><span>擊殺數</span><strong id="killText">0</strong></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>操作</h2>
+        <div class="controls">
+          <button id="digBtn" data-action="dig">挖掘 15</button>
+          <button id="blockBtn" data-action="block">封路 20</button>
+          <button id="slimeBtn" data-action="slime">召喚史萊姆 25</button>
+          <button id="archerBtn" data-action="archer">召喚弓手 35</button>
+          <button class="primary" id="startBtn">開始進攻</button>
+          <button id="settingsBtn">設定</button>
+          <button class="danger" id="restartBtn">重新開始</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>圖例</h2>
+        <div class="legend">
+          <div class="legend-item"><span class="swatch" style="background: var(--wall)"></span>牆壁</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--road)"></span>道路</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--green)"></span>入口</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--red)"></span>核心</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--blue)"></span>敵人</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--purple)"></span>史萊姆</div>
+          <div class="legend-item"><span class="swatch" style="background: #d7b45a"></span>弓手</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>測試重點</h2>
+        <ul class="notes">
+          <li>史萊姆與弓手能否形成前排/後排配置。</li>
+          <li>擊殺回收魔素後是否想繼續補強。</li>
+          <li>不同敵人是否會逼玩家調整防線。</li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog-body" id="settingsForm">
+      <h2>參數設定</h2>
+      <div class="settings-grid">
+        <label class="setting-row">初始魔素 <input type="number" id="setInitialMana" min="0" max="999" step="5"></label>
+        <label class="setting-row">核心 HP <input type="number" id="setCoreHp" min="10" max="999" step="10"></label>
+        <label class="setting-row">敵人總數 <input type="number" id="setEnemyCount" min="1" max="60" step="1"></label>
+        <label class="setting-row">生成間隔 <input type="number" id="setSpawnInterval" min="0.3" max="5" step="0.05"></label>
+        <label class="setting-row">挖掘成本 <input type="number" id="setDigCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">封路成本 <input type="number" id="setBlockCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">史萊姆成本 <input type="number" id="setSlimeCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">弓手成本 <input type="number" id="setArcherCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">BGM 音量 <input type="range" id="setMusicVolume" min="0" max="1" step="0.05"></label>
+        <label class="setting-row">音效音量 <input type="range" id="setSfxVolume" min="0" max="1" step="0.05"></label>
+      </div>
+      <div class="dialog-actions">
+        <button value="cancel">取消</button>
+        <button class="primary" id="applySettingsBtn" value="default">套用並重開</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const COLS = 20;
+    const ROWS = 15;
+    const TILE = 40;
+    const DEFAULT_SETTINGS = {
+      initialMana: 140,
+      coreHp: 120,
+      enemyCount: 22,
+      spawnInterval: 1.25,
+      digCost: 15,
+      blockCost: 20,
+      slimeCost: 25,
+      archerCost: 35,
+      musicVolume: 0.18,
+      sfxVolume: 0.55,
+    };
+    let settings = { ...DEFAULT_SETTINGS };
+
+    const TILE_TYPE = {
+      WALL: 0,
+      ROAD: 1,
+      ENTRANCE: 2,
+      CORE: 3,
+    };
+
+    const COLORS = {
+      wall: "#35323a",
+      road: "#aaa2ad",
+      entrance: "#45b86c",
+      core: "#d84f5f",
+      enemy: "#4d8edb",
+      slime: "#9c64dc",
+      archer: "#d7b45a",
+      rogue: "#5fbfd1",
+      brute: "#b86852",
+      grid: "rgba(20, 18, 22, 0.45)",
+      path: "rgba(232, 197, 102, 0.18)",
+      text: "#f1edf4",
+    };
+
+    const ENEMY_TYPES = {
+      soldier: { name: "劍士", hp: 35, attack: 5, moveInterval: 0.5, reward: 15, color: COLORS.enemy, label: "劍" },
+      rogue: { name: "盜賊", hp: 24, attack: 4, moveInterval: 0.32, reward: 12, color: COLORS.rogue, label: "盜" },
+      brute: { name: "重甲", hp: 70, attack: 8, moveInterval: 0.72, reward: 24, color: COLORS.brute, label: "重" },
+    };
+
+    const ENEMY_SEQUENCE = [
+      "soldier", "soldier", "rogue", "soldier", "rogue",
+      "soldier", "brute", "rogue", "soldier", "brute",
+      "rogue", "soldier", "brute", "rogue", "soldier",
+      "rogue", "brute", "soldier", "rogue", "soldier",
+      "brute", "rogue", "soldier", "brute", "rogue",
+    ];
+
+    const levelRows = [
+      "####################",
+      "#S....##.....#.....#",
+      "#.....##.....#.....#",
+      "###..####..###..####",
+      "#....#......#......#",
+      "#....#..####...##..#",
+      "#.......#.....#....#",
+      "####..###..####..###",
+      "#......#.....#.....#",
+      "#..##....##....#...#",
+      "#..##....##....#...#",
+      "#.......#......#..C#",
+      "#.......#......#...#",
+      "#..................#",
+      "####################",
+    ];
+
+    let grid;
+    let entrance;
+    let core;
+    let selectedAction;
+    let mana;
+    let coreHp;
+    let phase;
+    let message;
+    let enemies;
+    let slimes;
+    let archers;
+    let floatingTexts;
+    let spawnedCount;
+    let killedCount;
+    let spawnTimer;
+    let uiRefreshTimer;
+    let lastTime;
+    let gameOver;
+    let previewPath;
+
+    const ui = {
+      phaseBadge: document.getElementById("phaseBadge"),
+      message: document.getElementById("message"),
+      manaText: document.getElementById("manaText"),
+      coreText: document.getElementById("coreText"),
+      coreBar: document.getElementById("coreBar"),
+      spawnText: document.getElementById("spawnText"),
+      enemyText: document.getElementById("enemyText"),
+      killText: document.getElementById("killText"),
+      digBtn: document.getElementById("digBtn"),
+      blockBtn: document.getElementById("blockBtn"),
+      slimeBtn: document.getElementById("slimeBtn"),
+      archerBtn: document.getElementById("archerBtn"),
+      startBtn: document.getElementById("startBtn"),
+      settingsBtn: document.getElementById("settingsBtn"),
+      restartBtn: document.getElementById("restartBtn"),
+      settingsDialog: document.getElementById("settingsDialog"),
+      settingsForm: document.getElementById("settingsForm"),
+      applySettingsBtn: document.getElementById("applySettingsBtn"),
+      setInitialMana: document.getElementById("setInitialMana"),
+      setCoreHp: document.getElementById("setCoreHp"),
+      setEnemyCount: document.getElementById("setEnemyCount"),
+      setSpawnInterval: document.getElementById("setSpawnInterval"),
+      setDigCost: document.getElementById("setDigCost"),
+      setBlockCost: document.getElementById("setBlockCost"),
+      setSlimeCost: document.getElementById("setSlimeCost"),
+      setArcherCost: document.getElementById("setArcherCost"),
+      setMusicVolume: document.getElementById("setMusicVolume"),
+      setSfxVolume: document.getElementById("setSfxVolume"),
+    };
+
+    let audioCtx;
+    let musicGain;
+    let sfxGain;
+    let musicTimer;
+
+    function init() {
+      grid = [];
+      entrance = null;
+      core = null;
+      selectedAction = "slime";
+      mana = settings.initialMana;
+      coreHp = settings.coreHp;
+      phase = "準備階段";
+      message = "先用初始魔素配置史萊姆與地形，準備好後按下開始進攻。";
+      enemies = [];
+      slimes = [];
+      archers = [];
+      floatingTexts = [];
+      spawnedCount = 0;
+      killedCount = 0;
+      spawnTimer = 0;
+      uiRefreshTimer = 0;
+      lastTime = performance.now();
+      gameOver = false;
+
+      for (let y = 0; y < ROWS; y++) {
+        const row = [];
+        for (let x = 0; x < COLS; x++) {
+          const mark = levelRows[y][x];
+          let type = TILE_TYPE.WALL;
+          if (mark === ".") type = TILE_TYPE.ROAD;
+          if (mark === "S") {
+            type = TILE_TYPE.ENTRANCE;
+            entrance = { x, y };
+          }
+          if (mark === "C") {
+            type = TILE_TYPE.CORE;
+            core = { x, y };
+          }
+          row.push(type);
+        }
+        grid.push(row);
+      }
+
+      previewPath = findPath(entrance, core, { ignoreUnits: true });
+      syncCostLabels();
+      updateButtons();
+      updateUI();
+    }
+
+    function setMessage(text) {
+      message = text;
+      ui.message.textContent = text;
+    }
+
+    function startAttack() {
+      if (phase !== "準備階段") return;
+      ensureAudio();
+      phase = "進攻階段";
+      spawnTimer = 1.2;
+      setMessage("人類冒險者開始入侵。用史萊姆卡住通道，讓弓手在後方輸出。");
+      updateUI();
+    }
+
+    function selectAction(action) {
+      selectedAction = action;
+      const names = { dig: "挖掘", block: "封路", slime: "召喚史萊姆", archer: "召喚弓手" };
+      setMessage(`目前選擇：${names[action]}。點選地圖格子執行。`);
+      updateButtons();
+    }
+
+    function updateButtons() {
+      [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn].forEach((button) => {
+        button.classList.toggle("active", button.dataset.action === selectedAction);
+      });
+      ui.startBtn.disabled = phase !== "準備階段" || gameOver;
+    }
+
+    function updateUI() {
+      ui.phaseBadge.textContent = phase;
+      ui.message.textContent = message;
+      ui.manaText.textContent = mana;
+      ui.coreText.textContent = `${Math.max(0, Math.ceil(coreHp))} / ${settings.coreHp}`;
+      ui.coreBar.style.width = `${Math.max(0, coreHp / settings.coreHp) * 100}%`;
+      ui.spawnText.textContent = `${spawnedCount} / ${settings.enemyCount}`;
+      ui.enemyText.textContent = enemies.length;
+      ui.killText.textContent = killedCount;
+      document.getElementById("debugState").textContent = JSON.stringify(getDebugState());
+      updateButtons();
+    }
+
+    function syncCostLabels() {
+      ui.digBtn.textContent = `挖掘 ${settings.digCost}`;
+      ui.blockBtn.textContent = `封路 ${settings.blockCost}`;
+      ui.slimeBtn.textContent = `召喚史萊姆 ${settings.slimeCost}`;
+      ui.archerBtn.textContent = `召喚弓手 ${settings.archerCost}`;
+    }
+
+    function openSettings() {
+      ui.setInitialMana.value = settings.initialMana;
+      ui.setCoreHp.value = settings.coreHp;
+      ui.setEnemyCount.value = settings.enemyCount;
+      ui.setSpawnInterval.value = settings.spawnInterval;
+      ui.setDigCost.value = settings.digCost;
+      ui.setBlockCost.value = settings.blockCost;
+      ui.setSlimeCost.value = settings.slimeCost;
+      ui.setArcherCost.value = settings.archerCost;
+      ui.setMusicVolume.value = settings.musicVolume;
+      ui.setSfxVolume.value = settings.sfxVolume;
+      ui.settingsDialog.showModal();
+    }
+
+    function applySettings() {
+      settings = {
+        initialMana: readNumber(ui.setInitialMana, DEFAULT_SETTINGS.initialMana),
+        coreHp: readNumber(ui.setCoreHp, DEFAULT_SETTINGS.coreHp),
+        enemyCount: readNumber(ui.setEnemyCount, DEFAULT_SETTINGS.enemyCount),
+        spawnInterval: readNumber(ui.setSpawnInterval, DEFAULT_SETTINGS.spawnInterval),
+        digCost: readNumber(ui.setDigCost, DEFAULT_SETTINGS.digCost),
+        blockCost: readNumber(ui.setBlockCost, DEFAULT_SETTINGS.blockCost),
+        slimeCost: readNumber(ui.setSlimeCost, DEFAULT_SETTINGS.slimeCost),
+        archerCost: readNumber(ui.setArcherCost, DEFAULT_SETTINGS.archerCost),
+        musicVolume: readNumber(ui.setMusicVolume, DEFAULT_SETTINGS.musicVolume),
+        sfxVolume: readNumber(ui.setSfxVolume, DEFAULT_SETTINGS.sfxVolume),
+      };
+      updateAudioVolumes();
+      init();
+      setMessage("設定已套用，關卡已重新開始。");
+    }
+
+    function readNumber(input, fallback) {
+      const value = Number(input.value);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function ensureAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      musicGain = audioCtx.createGain();
+      sfxGain = audioCtx.createGain();
+      musicGain.connect(audioCtx.destination);
+      sfxGain.connect(audioCtx.destination);
+      updateAudioVolumes();
+      startBgm();
+    }
+
+    function updateAudioVolumes() {
+      if (!audioCtx) return;
+      musicGain.gain.value = settings.musicVolume;
+      sfxGain.gain.value = settings.sfxVolume;
+    }
+
+    function startBgm() {
+      if (!audioCtx || musicTimer) return;
+      const notes = [98, 123.47, 146.83, 123.47, 87.31, 110, 130.81, 110];
+      let index = 0;
+      musicTimer = setInterval(() => {
+        if (gameOver) return;
+        playTone(notes[index % notes.length], 0.22, "sine", musicGain, 0.08);
+        playTone(notes[(index + 2) % notes.length] * 2, 0.08, "triangle", musicGain, 0.025);
+        index++;
+      }, 360);
+    }
+
+    function playTone(freq, duration, type, output, volume = 0.12) {
+      if (!audioCtx || !output) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(volume, audioCtx.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(output);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration + 0.02);
+    }
+
+    function playHitSound() {
+      playTone(180, 0.055, "square", sfxGain, 0.12);
+      playTone(92, 0.08, "sawtooth", sfxGain, 0.05);
+    }
+
+    function playDeathSound() {
+      playTone(260, 0.08, "triangle", sfxGain, 0.12);
+      setTimeout(() => playTone(130, 0.12, "sawtooth", sfxGain, 0.08), 70);
+    }
+
+    function playVictorySound() {
+      [262, 330, 392, 523].forEach((freq, index) => {
+        setTimeout(() => playTone(freq, 0.24, "triangle", sfxGain, 0.16), index * 110);
+      });
+    }
+
+    function playDefeatSound() {
+      [220, 174, 130, 98].forEach((freq, index) => {
+        setTimeout(() => playTone(freq, 0.22, "sawtooth", sfxGain, 0.12), index * 120);
+      });
+    }
+
+    function getDebugState() {
+      return {
+        phase,
+        mana,
+        coreHp,
+        spawnedCount,
+        killedCount,
+        enemies: enemies.map((enemy) => ({ type: enemy.type, x: enemy.x, y: enemy.y, hp: enemy.hp, pathLen: enemy.path.length })),
+        slimes: slimes.map((slime) => ({ x: slime.x, y: slime.y, hp: slime.hp })),
+        archers: archers.map((archer) => ({ x: archer.x, y: archer.y, hp: archer.hp })),
+      };
+    }
+
+    function isInside(x, y) {
+      return x >= 0 && x < COLS && y >= 0 && y < ROWS;
+    }
+
+    function isWalkableType(type) {
+      return type === TILE_TYPE.ROAD || type === TILE_TYPE.ENTRANCE || type === TILE_TYPE.CORE;
+    }
+
+    function blocksSight(x, y) {
+      return !isInside(x, y) || grid[y][x] === TILE_TYPE.WALL;
+    }
+
+    function hasLineOfSight(a, b) {
+      const x0 = a.x + 0.5;
+      const y0 = a.y + 0.5;
+      const x1 = b.x + 0.5;
+      const y1 = b.y + 0.5;
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+      const steps = Math.max(Math.abs(dx), Math.abs(dy)) * 8;
+
+      for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        const x = Math.floor(x0 + dx * t);
+        const y = Math.floor(y0 + dy * t);
+        if ((x === a.x && y === a.y) || (x === b.x && y === b.y)) continue;
+        if (blocksSight(x, y)) return false;
+      }
+      return true;
+    }
+
+    function isSame(a, b) {
+      return a && b && a.x === b.x && a.y === b.y;
+    }
+
+    function neighbors(pos) {
+      return [
+        { x: pos.x + 1, y: pos.y },
+        { x: pos.x - 1, y: pos.y },
+        { x: pos.x, y: pos.y + 1 },
+        { x: pos.x, y: pos.y - 1 },
+      ].filter((p) => isInside(p.x, p.y));
+    }
+
+    function unitAt(x, y) {
+      return enemies.find((e) => e.x === x && e.y === y) || monsterAt(x, y);
+    }
+
+    function enemyAt(x, y) {
+      return enemies.find((e) => e.x === x && e.y === y);
+    }
+
+    function slimeAt(x, y) {
+      return slimes.find((s) => s.x === x && s.y === y);
+    }
+
+    function archerAt(x, y) {
+      return archers.find((a) => a.x === x && a.y === y);
+    }
+
+    function monsterAt(x, y) {
+      return slimeAt(x, y) || archerAt(x, y);
+    }
+
+    function canStandOn(x, y, options = {}) {
+      if (!isInside(x, y)) return false;
+      if (!isWalkableType(grid[y][x])) return false;
+      if (!options.ignoreUnits && unitAt(x, y) && !isSame({ x, y }, options.allowPosition)) return false;
+      return true;
+    }
+
+    function findPath(start, goal, options = {}) {
+      if (!start || !goal) return null;
+      const queue = [start];
+      const visited = new Set([`${start.x},${start.y}`]);
+      const cameFrom = new Map();
+
+      while (queue.length) {
+        const current = queue.shift();
+        if (isSame(current, goal)) {
+          const path = [];
+          let key = `${current.x},${current.y}`;
+          while (cameFrom.has(key)) {
+            const [x, y] = key.split(",").map(Number);
+            path.push({ x, y });
+            key = cameFrom.get(key);
+          }
+          path.reverse();
+          return path;
+        }
+
+        for (const next of neighbors(current)) {
+          const key = `${next.x},${next.y}`;
+          if (visited.has(key)) continue;
+          const allowedPosition = options.allowPosition || start;
+          if (!canStandOn(next.x, next.y, { ignoreUnits: options.ignoreUnits, allowPosition: allowedPosition })) continue;
+          visited.add(key);
+          cameFrom.set(key, `${current.x},${current.y}`);
+          queue.push(next);
+        }
+      }
+      return null;
+    }
+
+    function recomputePaths() {
+      for (const enemy of enemies) {
+        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+      }
+      previewPath = findPath(entrance, core, { ignoreUnits: true });
+    }
+
+    function spend(amount) {
+      if (mana < amount) {
+        setMessage("魔素不足。");
+        return false;
+      }
+      mana -= amount;
+      return true;
+    }
+
+    function handleTileClick(x, y) {
+      if (gameOver) return;
+      ensureAudio();
+      if (!isInside(x, y)) return;
+
+      if (selectedAction === "dig") digTile(x, y);
+      if (selectedAction === "block") blockTile(x, y);
+      if (selectedAction === "slime") summonSlime(x, y);
+      if (selectedAction === "archer") summonArcher(x, y);
+      updateUI();
+    }
+
+    function digTile(x, y) {
+      if (grid[y][x] !== TILE_TYPE.WALL) {
+        setMessage("只能挖掘牆壁。");
+        return;
+      }
+      if (x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1) {
+        setMessage("邊界牆不可挖掘。");
+        return;
+      }
+      if (!spend(settings.digCost)) return;
+      grid[y][x] = TILE_TYPE.ROAD;
+      recomputePaths();
+      setMessage("挖出新的道路，敵人已重新判斷路線。");
+    }
+
+    function blockTile(x, y) {
+      if (grid[y][x] !== TILE_TYPE.ROAD) {
+        setMessage("只能封閉普通道路。");
+        return;
+      }
+      if (unitAt(x, y)) {
+        setMessage("有單位停在這格，不能封路。");
+        return;
+      }
+
+      const original = grid[y][x];
+      grid[y][x] = TILE_TYPE.WALL;
+      const routeStillExists = findPath(entrance, core, { ignoreUnits: true });
+      grid[y][x] = original;
+
+      if (!routeStillExists) {
+        setMessage("不能完全封死入口到核心的路。");
+        return;
+      }
+      if (!spend(settings.blockCost)) return;
+      grid[y][x] = TILE_TYPE.WALL;
+      recomputePaths();
+      setMessage("道路已封閉，入侵者將被迫改道。");
+    }
+
+    function summonSlime(x, y) {
+      if (grid[y][x] !== TILE_TYPE.ROAD) {
+        setMessage("史萊姆只能召喚在普通道路上。");
+        return;
+      }
+      if (unitAt(x, y)) {
+        setMessage("這格已經有單位。");
+        return;
+      }
+      if (!spend(settings.slimeCost)) return;
+      slimes.push({
+        x,
+        y,
+        hp: 45,
+        maxHp: 45,
+        attack: 8,
+        attackTimer: 0,
+        flash: 0,
+        homeX: x,
+        homeY: y,
+        roamRadius: 3,
+        roamTimer: 0.4,
+      });
+      recomputePaths();
+      setMessage("史萊姆已召喚。它會擋住通道並攻擊相鄰敵人。");
+    }
+
+    function summonArcher(x, y) {
+      if (grid[y][x] !== TILE_TYPE.ROAD) {
+        setMessage("弓手只能召喚在普通道路上。");
+        return;
+      }
+      if (unitAt(x, y)) {
+        setMessage("這格已經有單位。");
+        return;
+      }
+      if (!spend(settings.archerCost)) return;
+      archers.push({
+        x,
+        y,
+        hp: 28,
+        maxHp: 28,
+        attack: 9,
+        range: 4,
+        attackTimer: 0,
+        flash: 0,
+        homeX: x,
+        homeY: y,
+        roamRadius: 2,
+        roamTimer: 0.5,
+      });
+      recomputePaths();
+      setMessage("弓手已召喚。把它放在史萊姆後方，可以穩定輸出。");
+    }
+
+    function spawnEnemy() {
+      if (spawnedCount >= settings.enemyCount) return;
+      if (unitAt(entrance.x, entrance.y)) return;
+
+      const typeId = ENEMY_SEQUENCE[spawnedCount] || "soldier";
+      const type = ENEMY_TYPES[typeId];
+      const enemy = {
+        x: entrance.x,
+        y: entrance.y,
+        type: typeId,
+        name: type.name,
+        hp: type.hp,
+        maxHp: type.hp,
+        attack: type.attack,
+        moveInterval: type.moveInterval,
+        reward: type.reward,
+        color: type.color,
+        label: type.label,
+        attackTimer: 0,
+        moveTimer: 0,
+        path: [],
+        flash: 0,
+      };
+      enemies.push(enemy);
+      spawnedCount++;
+      enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+    }
+
+    function update(dt) {
+      if (gameOver) return;
+      if (phase === "進攻階段") {
+        spawnTimer -= dt;
+        if (spawnTimer <= 0 && spawnedCount < settings.enemyCount) {
+          spawnEnemy();
+          spawnTimer += settings.spawnInterval;
+        }
+      }
+
+      updateMonsterMovement(dt);
+      const attackClaims = new Map();
+      updateSlimes(dt, attackClaims);
+      updateArchers(dt, attackClaims);
+      updateEnemies(dt);
+      updateFeedback(dt);
+      cleanDeadUnits();
+      checkEndConditions();
+      uiRefreshTimer -= dt;
+      if (uiRefreshTimer <= 0) {
+        updateUI();
+        uiRefreshTimer = 0.15;
+      }
+    }
+
+    function updateMonsterMovement(dt) {
+      for (const slime of slimes) {
+        updateSlimeMovement(slime, dt);
+      }
+      for (const archer of archers) {
+        updateArcherMovement(archer, dt);
+      }
+    }
+
+    function updateSlimeMovement(slime, dt) {
+      slime.roamTimer -= dt;
+      if (slime.roamTimer > 0 || enemies.length === 0) return;
+      slime.roamTimer = 0.65;
+
+      const current = { x: slime.x, y: slime.y };
+      const candidates = getMonsterMoveCandidates(slime);
+      const score = (pos) => {
+        let value = -0.2 * manhattan(pos, { x: slime.homeX, y: slime.homeY });
+        for (const enemy of enemies) {
+          const next = getEnemyNextStep(enemy);
+          if (next && isSame(pos, next)) value += 22;
+          if (manhattan(pos, enemy) === 1) value += 10 - adjacentMonsterCount(enemy) * 4;
+          value -= Math.min(5, manhattan(pos, enemy)) * 0.45;
+        }
+        return value;
+      };
+
+      moveMonsterToBestCandidate(slime, candidates, current, score, 1.4);
+    }
+
+    function updateArcherMovement(archer, dt) {
+      archer.roamTimer -= dt;
+      if (archer.roamTimer > 0 || enemies.length === 0) return;
+      archer.roamTimer = 0.9;
+
+      const current = { x: archer.x, y: archer.y };
+      const candidates = getMonsterMoveCandidates(archer);
+      const score = (pos) => {
+        let value = -0.25 * manhattan(pos, { x: archer.homeX, y: archer.homeY });
+        for (const enemy of enemies) {
+          const distance = manhattan(pos, enemy);
+          const next = getEnemyNextStep(enemy);
+          if (distance <= archer.range && hasLineOfSight(pos, enemy)) value += 7;
+          if (distance === 1) value -= 12;
+          if (next && isSame(pos, next)) value -= 10;
+          value -= Math.abs(distance - 3) * 0.35;
+        }
+        return value;
+      };
+
+      moveMonsterToBestCandidate(archer, candidates, current, score, 1.1);
+    }
+
+    function getMonsterMoveCandidates(monster) {
+      return [monster, ...neighbors(monster)].filter((pos) => {
+        if (grid[pos.y][pos.x] !== TILE_TYPE.ROAD) return false;
+        if (manhattan(pos, { x: monster.homeX, y: monster.homeY }) > monster.roamRadius) return false;
+        const occupant = unitAt(pos.x, pos.y);
+        return !occupant || occupant === monster;
+      });
+    }
+
+    function moveMonsterToBestCandidate(monster, candidates, current, score, threshold) {
+      let best = current;
+      let bestScore = score(current);
+      for (const candidate of candidates) {
+        const candidateScore = score(candidate);
+        if (candidateScore > bestScore) {
+          best = candidate;
+          bestScore = candidateScore;
+        }
+      }
+      if (!isSame(best, current) && bestScore >= score(current) + threshold) {
+        monster.x = best.x;
+        monster.y = best.y;
+        recomputePaths();
+      }
+    }
+
+    function updateSlimes(dt, attackClaims) {
+      for (const slime of slimes) {
+        slime.flash = Math.max(0, (slime.flash || 0) - dt);
+        slime.attackTimer -= dt;
+        if (slime.attackTimer > 0) continue;
+
+        const targets = neighbors(slime)
+          .map((p) => enemyAt(p.x, p.y))
+          .filter(Boolean)
+          .filter((enemy) => getAttackClaims(attackClaims, enemy) < 2)
+          .sort((a, b) => {
+            const pressure = getAttackClaims(attackClaims, a) - getAttackClaims(attackClaims, b);
+            return pressure || distanceToCore(a) - distanceToCore(b);
+          });
+
+        if (targets.length) {
+          damageUnit(targets[0], slime.attack, "#e9d26f");
+          claimAttack(attackClaims, targets[0]);
+          slime.attackTimer = 1;
+        }
+      }
+    }
+
+    function updateArchers(dt, attackClaims) {
+      for (const archer of archers) {
+        archer.flash = Math.max(0, (archer.flash || 0) - dt);
+        archer.attackTimer -= dt;
+        if (archer.attackTimer > 0) continue;
+
+        const targets = enemies
+          .filter((enemy) => manhattan(archer, enemy) <= archer.range)
+          .filter((enemy) => hasLineOfSight(archer, enemy))
+          .filter((enemy) => getAttackClaims(attackClaims, enemy) < 2)
+          .sort((a, b) => {
+            const pressure = getAttackClaims(attackClaims, a) - getAttackClaims(attackClaims, b);
+            return pressure || distanceToCore(a) - distanceToCore(b);
+          });
+
+        if (targets.length) {
+          damageUnit(targets[0], archer.attack, "#ffd66f");
+          claimAttack(attackClaims, targets[0]);
+          spawnFloatingText("射", archer.x, archer.y, "#ffd66f");
+          archer.attackTimer = 1.25;
+        }
+      }
+    }
+
+    function updateEnemies(dt) {
+      for (const enemy of enemies) {
+        enemy.attackTimer -= dt;
+        enemy.moveTimer -= dt;
+
+        enemy.flash = Math.max(0, (enemy.flash || 0) - dt);
+        const nextToCore = neighbors(enemy).some((p) => isSame(p, core));
+        if (nextToCore) {
+          if (enemy.attackTimer <= 0) {
+            coreHp -= enemy.attack;
+            spawnFloatingText(`-${enemy.attack}`, core.x, core.y, "#ff8f8f");
+            enemy.attackTimer = 1;
+          }
+          continue;
+        }
+
+        if (enemy.moveTimer <= 0) {
+          moveEnemy(enemy);
+          enemy.moveTimer = enemy.moveInterval;
+        }
+      }
+    }
+
+    function damageUnit(unit, amount, color) {
+      unit.hp -= amount;
+      unit.flash = 0.16;
+      spawnFloatingText(`-${amount}`, unit.x, unit.y, color);
+      playHitSound();
+    }
+
+    function spawnFloatingText(text, x, y, color) {
+      floatingTexts.push({
+        text,
+        x: x * TILE + TILE / 2,
+        y: y * TILE + TILE / 2 - 18,
+        color,
+        life: 0.7,
+      });
+    }
+
+    function updateFeedback(dt) {
+      for (const fx of floatingTexts) {
+        fx.life -= dt;
+        fx.y -= 28 * dt;
+      }
+      floatingTexts = floatingTexts.filter((fx) => fx.life > 0);
+    }
+
+    function moveEnemy(enemy) {
+      if (!enemy.path || enemy.path.length === 0) {
+        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+      }
+      if (!enemy.path.length) return;
+
+      const next = enemy.path[0];
+      if (isSame(next, core)) return;
+      const blockingMonster = monsterAt(next.x, next.y);
+      if (blockingMonster) {
+        if (enemy.attackTimer <= 0) {
+          damageUnit(blockingMonster, enemy.attack, "#ff8f8f");
+          enemy.attackTimer = 1;
+        }
+        return;
+      }
+      if (enemyAt(next.x, next.y)) return;
+      if (!canStandOn(next.x, next.y, { allowPosition: { x: enemy.x, y: enemy.y } })) {
+        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+        return;
+      }
+
+      enemy.x = next.x;
+      enemy.y = next.y;
+      enemy.path.shift();
+    }
+
+    function cleanDeadUnits() {
+      const deadEnemies = enemies.filter((enemy) => enemy.hp <= 0);
+      enemies = enemies.filter((enemy) => enemy.hp > 0);
+      if (deadEnemies.length > 0) {
+        const reward = deadEnemies.reduce((sum, enemy) => sum + enemy.reward, 0);
+        killedCount += deadEnemies.length;
+        mana = Math.min(999, mana + reward);
+        for (const enemy of deadEnemies) {
+          spawnFloatingText(`+${enemy.reward}`, enemy.x, enemy.y, "#8fe68f");
+        }
+        playDeathSound();
+        setMessage(`擊敗 ${deadEnemies.length} 名敵人，回收 ${reward} 魔素。`);
+        recomputePaths();
+      }
+
+      const beforeSlimes = slimes.length;
+      slimes = slimes.filter((slime) => slime.hp > 0);
+      const beforeArchers = archers.length;
+      archers = archers.filter((archer) => archer.hp > 0);
+      if (beforeSlimes !== slimes.length || beforeArchers !== archers.length) {
+        playDeathSound();
+        setMessage("魔物被擊倒了，防線出現缺口。");
+        recomputePaths();
+      }
+    }
+
+    function checkEndConditions() {
+      if (coreHp <= 0) {
+        phase = "核心被摧毀";
+        gameOver = true;
+        playDefeatSound();
+        setMessage("核心被摧毀。這局防衛失敗，可以重新挑戰。");
+        return;
+      }
+
+      if (phase === "進攻階段" && spawnedCount >= settings.enemyCount && enemies.length === 0) {
+        phase = "防衛成功";
+        gameOver = true;
+        playVictorySound();
+        setMessage("防衛成功。史萊姆防線守住了地下城核心。");
+      }
+    }
+
+    function distanceToCore(unit) {
+      return Math.abs(unit.x - core.x) + Math.abs(unit.y - core.y);
+    }
+
+    function manhattan(a, b) {
+      return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
+
+    function getEnemyNextStep(enemy) {
+      if (!enemy.path || enemy.path.length === 0) {
+        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+      }
+      return enemy.path[0] || null;
+    }
+
+    function adjacentMonsterCount(enemy) {
+      return neighbors(enemy).filter((pos) => monsterAt(pos.x, pos.y)).length;
+    }
+
+    function getAttackClaims(claims, enemy) {
+      return claims.get(enemy) || 0;
+    }
+
+    function claimAttack(claims, enemy) {
+      claims.set(enemy, getAttackClaims(claims, enemy) + 1);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
+      drawPreviewPath();
+      drawUnits();
+      drawFeedback();
+      requestAnimationFrame(draw);
+    }
+
+    function drawGrid() {
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const type = grid[y][x];
+          ctx.fillStyle = COLORS.wall;
+          if (type === TILE_TYPE.ROAD) ctx.fillStyle = COLORS.road;
+          if (type === TILE_TYPE.ENTRANCE) ctx.fillStyle = COLORS.entrance;
+          if (type === TILE_TYPE.CORE) ctx.fillStyle = COLORS.core;
+          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          ctx.strokeStyle = COLORS.grid;
+          ctx.strokeRect(x * TILE + 0.5, y * TILE + 0.5, TILE - 1, TILE - 1);
+
+          if (type === TILE_TYPE.ENTRANCE) drawTileLabel("入", x, y);
+          if (type === TILE_TYPE.CORE) drawTileLabel("核", x, y);
+        }
+      }
+    }
+
+    function drawPreviewPath() {
+      if (!previewPath) return;
+      ctx.fillStyle = COLORS.path;
+      for (const pos of previewPath) {
+        if (isSame(pos, core)) continue;
+        ctx.fillRect(pos.x * TILE + 8, pos.y * TILE + 8, TILE - 16, TILE - 16);
+      }
+    }
+
+    function drawTileLabel(text, x, y) {
+      ctx.fillStyle = COLORS.text;
+      ctx.font = "bold 20px Microsoft JhengHei, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x * TILE + TILE / 2, y * TILE + TILE / 2);
+    }
+
+    function drawUnits() {
+      for (const slime of slimes) {
+        drawUnit(slime, COLORS.slime, "史");
+      }
+      for (const archer of archers) {
+        drawUnit(archer, COLORS.archer, "弓");
+      }
+      for (const enemy of enemies) {
+        drawUnit(enemy, enemy.color, enemy.label);
+      }
+    }
+
+    function drawUnit(unit, color, label) {
+      const cx = unit.x * TILE + TILE / 2;
+      const cy = unit.y * TILE + TILE / 2;
+      ctx.fillStyle = unit.flash > 0 ? "#ffffff" : color;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px Microsoft JhengHei, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, cx, cy + 1);
+
+      const width = 34;
+      const ratio = Math.max(0, unit.hp / unit.maxHp);
+      ctx.fillStyle = "#17151a";
+      ctx.fillRect(cx - width / 2, cy - 25, width, 5);
+      ctx.fillStyle = ratio > 0.45 ? "#45b86c" : "#d84f5f";
+      ctx.fillRect(cx - width / 2, cy - 25, width * ratio, 5);
+    }
+
+    function drawFeedback() {
+      ctx.font = "bold 15px Microsoft JhengHei, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (const fx of floatingTexts) {
+        ctx.globalAlpha = Math.max(0, fx.life / 0.7);
+        ctx.fillStyle = fx.color;
+        ctx.fillText(fx.text, fx.x, fx.y);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function tick(now) {
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+      update(dt);
+      requestAnimationFrame(tick);
+    }
+
+    canvas.addEventListener("click", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = Math.floor(((event.clientX - rect.left) * scaleX) / TILE);
+      const y = Math.floor(((event.clientY - rect.top) * scaleY) / TILE);
+      handleTileClick(x, y);
+    });
+
+    [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn].forEach((button) => {
+      button.addEventListener("click", () => selectAction(button.dataset.action));
+    });
+    ui.startBtn.addEventListener("click", startAttack);
+    ui.settingsBtn.addEventListener("click", openSettings);
+    ui.applySettingsBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      applySettings();
+      ui.settingsDialog.close();
+    });
+    [ui.setMusicVolume, ui.setSfxVolume].forEach((input) => {
+      input.addEventListener("input", () => {
+        settings.musicVolume = readNumber(ui.setMusicVolume, settings.musicVolume);
+        settings.sfxVolume = readNumber(ui.setSfxVolume, settings.sfxVolume);
+        updateAudioVolumes();
+      });
+    });
+    ui.restartBtn.addEventListener("click", init);
+
+    init();
+    requestAnimationFrame(draw);
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
