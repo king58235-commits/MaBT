@@ -94,7 +94,7 @@
     canvas {
       display: block;
       width: 100%;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 3 / 2;
       image-rendering: pixelated;
       background: #0f0e11;
       border-radius: 4px;
@@ -218,6 +218,54 @@
       justify-content: flex-end;
       gap: 10px;
       margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .dialog-tools {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .dialog-status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: var(--gold);
+      font-size: 13px;
+    }
+
+    .setting-row input[type="checkbox"] {
+      width: 22px;
+      min-height: 22px;
+      justify-self: end;
+      accent-color: var(--gold);
+    }
+
+    .hero-settings {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .hero-card {
+      border: 1px solid var(--line);
+      background: #1b191d;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .hero-card h3 {
+      margin: 0 0 6px;
+      color: var(--gold);
+      font-size: 16px;
+    }
+
+    .hero-card p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
     }
 
     button {
@@ -314,7 +362,7 @@
       </header>
 
       <div class="canvas-wrap">
-        <canvas id="game" width="800" height="600" aria-label="地下城棋盤"></canvas>
+        <canvas id="game" width="960" height="640" aria-label="地下城棋盤"></canvas>
       </div>
 
       <div class="message" id="message">先用初始魔素配置史萊姆與地形，準備好後按下開始進攻。</div>
@@ -325,10 +373,11 @@
       <section class="panel">
         <h2>戰況</h2>
         <div class="stats">
-          <div class="stat"><span>魔素</span><strong id="manaText">140</strong></div>
-          <div class="stat"><span>核心 HP</span><strong id="coreText">120 / 120</strong></div>
+          <div class="stat"><span>魔素</span><strong id="manaText">90</strong></div>
+          <div class="stat"><span>挖掘力</span><strong id="digPowerText">4 / 4</strong></div>
+          <div class="stat"><span>核心 HP</span><strong id="coreText">140 / 140</strong></div>
           <div class="hpbar"><span id="coreBar"></span></div>
-          <div class="stat"><span>敵人生成</span><strong id="spawnText">0 / 22</strong></div>
+          <div class="stat"><span>敵人生成</span><strong id="spawnText">0 / 28</strong></div>
           <div class="stat"><span>場上敵人</span><strong id="enemyText">0</strong></div>
           <div class="stat"><span>擊殺數</span><strong id="killText">0</strong></div>
         </div>
@@ -341,6 +390,8 @@
           <button id="blockBtn" data-action="block">封路 20</button>
           <button id="slimeBtn" data-action="slime">召喚史萊姆 25</button>
           <button id="archerBtn" data-action="archer">召喚弓手 35</button>
+          <button id="heroBtn" data-action="hero">召喚艾爾 90</button>
+          <button id="coreBtn" data-action="core">移動核心</button>
           <button class="primary" id="startBtn">開始進攻</button>
           <button id="settingsBtn">設定</button>
           <button class="danger" id="restartBtn">重新開始</button>
@@ -357,6 +408,8 @@
           <div class="legend-item"><span class="swatch" style="background: var(--blue)"></span>敵人</div>
           <div class="legend-item"><span class="swatch" style="background: var(--purple)"></span>史萊姆</div>
           <div class="legend-item"><span class="swatch" style="background: #d7b45a"></span>弓手</div>
+          <div class="legend-item"><span class="swatch" style="background: #ff7ad9"></span>我方英雄</div>
+          <div class="legend-item"><span class="swatch" style="background: #fff0a8"></span>敵方英雄</div>
         </div>
       </section>
 
@@ -380,12 +433,84 @@
         <label class="setting-row">敵人總數 <input type="number" id="setEnemyCount" min="1" max="60" step="1"></label>
         <label class="setting-row">生成間隔 <input type="number" id="setSpawnInterval" min="0.3" max="5" step="0.05"></label>
         <label class="setting-row">挖掘成本 <input type="number" id="setDigCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">最大挖掘力 <input type="number" id="setDigPowerMax" min="0" max="99" step="1"></label>
+        <label class="setting-row">挖掘力消耗 <input type="number" id="setDigPowerCost" min="0" max="99" step="1"></label>
+        <label class="setting-row">挖掘力回復間隔 <input type="number" id="setDigPowerRegenInterval" min="0.1" max="120" step="0.1"></label>
+        <label class="setting-row">挖掘力回復量 <input type="number" id="setDigPowerRegenAmount" min="0" max="99" step="1"></label>
         <label class="setting-row">封路成本 <input type="number" id="setBlockCost" min="0" max="200" step="1"></label>
         <label class="setting-row">史萊姆成本 <input type="number" id="setSlimeCost" min="0" max="200" step="1"></label>
         <label class="setting-row">弓手成本 <input type="number" id="setArcherCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">史萊姆冷卻 <input type="number" id="setSlimeCooldown" min="0" max="30" step="0.5"></label>
+        <label class="setting-row">弓手冷卻 <input type="number" id="setArcherCooldown" min="0" max="30" step="0.5"></label>
+        <label class="setting-row">魔素自然回復 <input type="checkbox" id="setManaRegenEnabled"></label>
+        <label class="setting-row">自然回復間隔 <input type="number" id="setManaRegenInterval" min="0.1" max="60" step="0.1"></label>
+        <label class="setting-row">自然回復量 <input type="number" id="setManaRegenAmount" min="0" step="1"></label>
+        <label class="setting-row">敵人掉落 <input type="number" id="setEnemyReward" min="0" max="50" step="1"></label>
+        <label class="setting-row">挖牆空包率 <input type="number" id="setDigEmptyChance" min="0" max="1" step="0.05"></label>
+        <label class="setting-row">挖牆小礦率 <input type="number" id="setDigSmallChance" min="0" max="1" step="0.05"></label>
+        <label class="setting-row">小礦最小值 <input type="number" id="setDigSmallMin" min="0" max="100" step="1"></label>
+        <label class="setting-row">小礦最大值 <input type="number" id="setDigSmallMax" min="0" max="100" step="1"></label>
+        <label class="setting-row">大礦最小值 <input type="number" id="setDigBigMin" min="0" max="200" step="1"></label>
+        <label class="setting-row">大礦最大值 <input type="number" id="setDigBigMax" min="0" max="200" step="1"></label>
+        <label class="setting-row">核心視野 <input type="number" id="setCoreVision" min="1" max="20" step="1"></label>
+        <label class="setting-row">敵人攻擊間隔 <input type="number" id="setEnemyAttackInterval" min="0.2" max="5" step="0.05"></label>
+        <label class="setting-row">停滯秒數 <input type="number" id="setStuckSeconds" min="1" max="30" step="0.5"></label>
+        <label class="setting-row">突破秒數 <input type="number" id="setBreakthroughSeconds" min="1" max="30" step="0.5"></label>
+        <label class="setting-row">戰線檢查間隔 <input type="number" id="setProgressCheckInterval" min="0.5" max="10" step="0.5"></label>
+        <label class="setting-row">核心最短距離 <input type="number" id="setCoreMinDistance" min="1" max="60" step="1"></label>
+        <label class="setting-row">劍士 HP <input type="number" id="setSoldierHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">劍士攻擊 <input type="number" id="setSoldierAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">劍士移動間隔 <input type="number" id="setSoldierMove" min="0.1" max="5" step="0.05"></label>
+        <label class="setting-row">盜賊 HP <input type="number" id="setRogueHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">盜賊攻擊 <input type="number" id="setRogueAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">盜賊移動間隔 <input type="number" id="setRogueMove" min="0.1" max="5" step="0.05"></label>
+        <label class="setting-row">重甲 HP <input type="number" id="setBruteHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">重甲攻擊 <input type="number" id="setBruteAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">重甲移動間隔 <input type="number" id="setBruteMove" min="0.1" max="5" step="0.05"></label>
+        <label class="setting-row">史萊姆 HP <input type="number" id="setSlimeHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">史萊姆攻擊 <input type="number" id="setSlimeAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">史萊姆攻擊間隔 <input type="number" id="setSlimeAttackInterval" min="0.2" max="5" step="0.05"></label>
+        <label class="setting-row">弓手 HP <input type="number" id="setArcherHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">弓手攻擊 <input type="number" id="setArcherAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">弓手攻擊間隔 <input type="number" id="setArcherAttackInterval" min="0.2" max="5" step="0.05"></label>
+        <label class="setting-row">弓手射程 <input type="number" id="setArcherRange" min="1" max="15" step="1"></label>
         <label class="setting-row">BGM 音量 <input type="range" id="setMusicVolume" min="0" max="1" step="0.05"></label>
         <label class="setting-row">音效音量 <input type="range" id="setSfxVolume" min="0" max="1" step="0.05"></label>
       </div>
+      <div class="hero-settings">
+        <div class="hero-card">
+          <h3>妖狐神使 艾爾</h3>
+          <p>侍奉古老妖狐神的神使，以狐火替魔界眷屬縫合傷口。她不是守住整座地牢的答案，但能讓快要崩潰的防線重新站起來。</p>
+          <label class="setting-row">召喚成本 <input type="number" id="setHeroAllyCost" min="0" step="1"></label>
+          <label class="setting-row">HP <input type="number" id="setHeroAllyHp" min="1" step="1"></label>
+          <label class="setting-row">攻擊力 <input type="number" id="setHeroAllyAttack" min="0" step="1"></label>
+          <label class="setting-row">移動間隔 <input type="number" id="setHeroAllyMove" min="0.1" max="5" step="0.05"></label>
+          <label class="setting-row">治療量 <input type="number" id="setHeroAllyHealAmount" min="0" step="1"></label>
+          <label class="setting-row">治療範圍 <input type="number" id="setHeroAllyHealRange" min="1" max="10" step="1"></label>
+          <label class="setting-row">治療間隔 <input type="number" id="setHeroAllyHealInterval" min="0.2" max="20" step="0.1"></label>
+        </div>
+        <div class="hero-card">
+          <h3>冒險者祭司</h3>
+          <p>跟隨遠征隊深入魔界的白袍祭司。只要他仍站在戰線中央，冒險者就會一次又一次從瀕死邊緣被拉回來。</p>
+          <label class="setting-row">登場敵人數 <input type="number" id="setHeroEnemySpawnAt" min="1" step="1"></label>
+          <label class="setting-row">HP <input type="number" id="setHeroEnemyHp" min="1" step="1"></label>
+          <label class="setting-row">攻擊力 <input type="number" id="setHeroEnemyAttack" min="0" step="1"></label>
+          <label class="setting-row">移動間隔 <input type="number" id="setHeroEnemyMove" min="0.1" max="5" step="0.05"></label>
+          <label class="setting-row">治療量 <input type="number" id="setHeroEnemyHealAmount" min="0" step="1"></label>
+          <label class="setting-row">治療範圍 <input type="number" id="setHeroEnemyHealRange" min="1" max="10" step="1"></label>
+          <label class="setting-row">治療間隔 <input type="number" id="setHeroEnemyHealInterval" min="0.2" max="20" step="0.1"></label>
+        </div>
+      </div>
+      <div class="dialog-tools">
+        <button type="button" id="saveSettingsBtn">儲存目前參數</button>
+        <button type="button" id="loadSettingsBtn">載入已儲存參數</button>
+        <button type="button" id="exportSettingsBtn">匯出參數</button>
+        <button type="button" id="importSettingsBtn">匯入參數</button>
+        <button type="button" id="exportRecordsBtn">匯出對局紀錄</button>
+        <button type="button" id="clearRecordsBtn">清空對局紀錄</button>
+      </div>
+      <input type="file" id="settingsFileInput" accept="application/json,.json" hidden>
+      <div class="dialog-status" id="settingsStatus" aria-live="polite"></div>
       <div class="dialog-actions">
         <button value="cancel">取消</button>
         <button class="primary" id="applySettingsBtn" value="default">套用並重開</button>
@@ -397,22 +522,79 @@
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
-    const COLS = 20;
-    const ROWS = 15;
-    const TILE = 40;
+    const COLS = 30;
+    const ROWS = 20;
+    const TILE = 32;
     const DEFAULT_SETTINGS = {
-      initialMana: 140,
-      coreHp: 120,
-      enemyCount: 22,
+      initialMana: 90,
+      coreHp: 140,
+      enemyCount: 28,
       spawnInterval: 1.25,
-      digCost: 15,
-      blockCost: 20,
+      digCost: 5,
+      digPowerMax: 4,
+      digPowerCost: 1,
+      digPowerRegenInterval: 8,
+      digPowerRegenAmount: 1,
+      blockCost: 55,
       slimeCost: 25,
       archerCost: 35,
+      slimeCooldown: 4,
+      archerCooldown: 6,
+      manaRegenEnabled: true,
+      manaRegenInterval: 4,
+      manaRegenAmount: 2,
+      enemyReward: 3,
+      digEmptyChance: 0.6,
+      digSmallChance: 0.3,
+      digSmallMin: 4,
+      digSmallMax: 9,
+      digBigMin: 16,
+      digBigMax: 24,
+      coreVision: 6,
+      enemyAttackInterval: 1,
+      stuckSeconds: 8,
+      breakthroughSeconds: 7,
+      progressCheckInterval: 2,
+      coreMinDistance: 12,
+      soldierHp: 35,
+      soldierAttack: 5,
+      soldierMove: 0.5,
+      rogueHp: 24,
+      rogueAttack: 4,
+      rogueMove: 0.32,
+      bruteHp: 70,
+      bruteAttack: 8,
+      bruteMove: 0.75,
+      slimeHp: 45,
+      slimeAttack: 8,
+      slimeAttackInterval: 1,
+      archerHp: 28,
+      archerAttack: 9,
+      archerAttackInterval: 1.25,
+      archerRange: 4,
+      heroAllyCost: 90,
+      heroAllyHp: 150,
+      heroAllyAttack: 12,
+      heroAllyMove: 0.7,
+      heroAllyHealAmount: 10,
+      heroAllyHealRange: 3,
+      heroAllyHealInterval: 4,
+      heroEnemySpawnAt: 12,
+      heroEnemyHp: 130,
+      heroEnemyAttack: 6,
+      heroEnemyMove: 0.62,
+      heroEnemyHealAmount: 8,
+      heroEnemyHealRange: 3,
+      heroEnemyHealInterval: 4,
       musicVolume: 0.18,
       sfxVolume: 0.55,
     };
-    let settings = { ...DEFAULT_SETTINGS };
+    const STORAGE_KEYS = {
+      settings: "timeAuthority.settings.v1",
+      records: "timeAuthority.matchRecords.v1",
+    };
+    const SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
+    let settings = loadSettingsFromStorage();
 
     const TILE_TYPE = {
       WALL: 0,
@@ -429,6 +611,9 @@
       enemy: "#4d8edb",
       slime: "#9c64dc",
       archer: "#d7b45a",
+      alliedHero: "#ff7ad9",
+      enemyHero: "#fff0a8",
+      heal: "#85f0a3",
       rogue: "#5fbfd1",
       brute: "#b86852",
       grid: "rgba(20, 18, 22, 0.45)",
@@ -437,9 +622,9 @@
     };
 
     const ENEMY_TYPES = {
-      soldier: { name: "劍士", hp: 35, attack: 5, moveInterval: 0.5, reward: 15, color: COLORS.enemy, label: "劍" },
-      rogue: { name: "盜賊", hp: 24, attack: 4, moveInterval: 0.32, reward: 12, color: COLORS.rogue, label: "盜" },
-      brute: { name: "重甲", hp: 70, attack: 8, moveInterval: 0.72, reward: 24, color: COLORS.brute, label: "重" },
+      soldier: { name: "劍士", hpKey: "soldierHp", attackKey: "soldierAttack", moveKey: "soldierMove", color: COLORS.enemy, label: "劍" },
+      rogue: { name: "盜賊", hpKey: "rogueHp", attackKey: "rogueAttack", moveKey: "rogueMove", color: COLORS.rogue, label: "盜" },
+      brute: { name: "重甲", hpKey: "bruteHp", attackKey: "bruteAttack", moveKey: "bruteMove", color: COLORS.brute, label: "重" },
     };
 
     const ENEMY_SEQUENCE = [
@@ -451,21 +636,26 @@
     ];
 
     const levelRows = [
-      "####################",
-      "#S....##.....#.....#",
-      "#.....##.....#.....#",
-      "###..####..###..####",
-      "#....#......#......#",
-      "#....#..####...##..#",
-      "#.......#.....#....#",
-      "####..###..####..###",
-      "#......#.....#.....#",
-      "#..##....##....#...#",
-      "#..##....##....#...#",
-      "#.......#......#..C#",
-      "#.......#......#...#",
-      "#..................#",
-      "####################",
+      "##############################",
+      "#S.....#........#............#",
+      "#......#........#............#",
+      "#..##..#..####..#..######..###",
+      "#..##.....#.....#.......#....#",
+      "#..######.#.###########.#.##.#",
+      "#...........#.........#.#.##.#",
+      "####..#######..#####..#.#....#",
+      "#.....#........#......#..###.#",
+      "#.#####.########..######...#.#",
+      "#.......#......#.......###.#.#",
+      "#.#######.####.#.#####.....#.#",
+      "#.........#....#.#...#####.#.#",
+      "#####.#####.####.#.#.....#.#.#",
+      "#.....#.....#....#.#.###.#...#",
+      "#.#####.#####.####.#.#.#.###.#",
+      "#.......#..........#.#.#.....#",
+      "#..###############...#.#####C#",
+      "#............................#",
+      "##############################",
     ];
 
     let grid;
@@ -473,25 +663,47 @@
     let core;
     let selectedAction;
     let mana;
+    let digPower;
     let coreHp;
     let phase;
     let message;
     let enemies;
     let slimes;
     let archers;
+    let alliedHero;
     let floatingTexts;
+    let visualEffects;
     let spawnedCount;
     let killedCount;
     let spawnTimer;
     let uiRefreshTimer;
+    let manaRegenTimer;
+    let digPowerRegenTimer;
+    let slimeCooldownRemaining;
+    let archerCooldownRemaining;
+    let enemyIntel;
+    let hoverCell;
     let lastTime;
     let gameOver;
     let previewPath;
+    let digCount;
+    let blockCount;
+    let summonedSlimeCount;
+    let summonedArcherCount;
+    let summonedHeroCount;
+    let alliedHeroUsed;
+    let alliedHeroDead;
+    let enemyHeroSpawned;
+    let manaGainedFromDig;
+    let manaGainedFromRegen;
+    let matchStartedAt;
+    let matchEndedRecorded;
 
     const ui = {
       phaseBadge: document.getElementById("phaseBadge"),
       message: document.getElementById("message"),
       manaText: document.getElementById("manaText"),
+      digPowerText: document.getElementById("digPowerText"),
       coreText: document.getElementById("coreText"),
       coreBar: document.getElementById("coreBar"),
       spawnText: document.getElementById("spawnText"),
@@ -501,6 +713,8 @@
       blockBtn: document.getElementById("blockBtn"),
       slimeBtn: document.getElementById("slimeBtn"),
       archerBtn: document.getElementById("archerBtn"),
+      heroBtn: document.getElementById("heroBtn"),
+      coreBtn: document.getElementById("coreBtn"),
       startBtn: document.getElementById("startBtn"),
       settingsBtn: document.getElementById("settingsBtn"),
       restartBtn: document.getElementById("restartBtn"),
@@ -512,11 +726,71 @@
       setEnemyCount: document.getElementById("setEnemyCount"),
       setSpawnInterval: document.getElementById("setSpawnInterval"),
       setDigCost: document.getElementById("setDigCost"),
+      setDigPowerMax: document.getElementById("setDigPowerMax"),
+      setDigPowerCost: document.getElementById("setDigPowerCost"),
+      setDigPowerRegenInterval: document.getElementById("setDigPowerRegenInterval"),
+      setDigPowerRegenAmount: document.getElementById("setDigPowerRegenAmount"),
       setBlockCost: document.getElementById("setBlockCost"),
       setSlimeCost: document.getElementById("setSlimeCost"),
       setArcherCost: document.getElementById("setArcherCost"),
+      setSlimeCooldown: document.getElementById("setSlimeCooldown"),
+      setArcherCooldown: document.getElementById("setArcherCooldown"),
+      setManaRegenEnabled: document.getElementById("setManaRegenEnabled"),
+      setManaRegenInterval: document.getElementById("setManaRegenInterval"),
+      setManaRegenAmount: document.getElementById("setManaRegenAmount"),
+      setEnemyReward: document.getElementById("setEnemyReward"),
+      setDigEmptyChance: document.getElementById("setDigEmptyChance"),
+      setDigSmallChance: document.getElementById("setDigSmallChance"),
+      setDigSmallMin: document.getElementById("setDigSmallMin"),
+      setDigSmallMax: document.getElementById("setDigSmallMax"),
+      setDigBigMin: document.getElementById("setDigBigMin"),
+      setDigBigMax: document.getElementById("setDigBigMax"),
+      setCoreVision: document.getElementById("setCoreVision"),
+      setEnemyAttackInterval: document.getElementById("setEnemyAttackInterval"),
+      setStuckSeconds: document.getElementById("setStuckSeconds"),
+      setBreakthroughSeconds: document.getElementById("setBreakthroughSeconds"),
+      setProgressCheckInterval: document.getElementById("setProgressCheckInterval"),
+      setCoreMinDistance: document.getElementById("setCoreMinDistance"),
+      setSoldierHp: document.getElementById("setSoldierHp"),
+      setSoldierAttack: document.getElementById("setSoldierAttack"),
+      setSoldierMove: document.getElementById("setSoldierMove"),
+      setRogueHp: document.getElementById("setRogueHp"),
+      setRogueAttack: document.getElementById("setRogueAttack"),
+      setRogueMove: document.getElementById("setRogueMove"),
+      setBruteHp: document.getElementById("setBruteHp"),
+      setBruteAttack: document.getElementById("setBruteAttack"),
+      setBruteMove: document.getElementById("setBruteMove"),
+      setSlimeHp: document.getElementById("setSlimeHp"),
+      setSlimeAttack: document.getElementById("setSlimeAttack"),
+      setSlimeAttackInterval: document.getElementById("setSlimeAttackInterval"),
+      setArcherHp: document.getElementById("setArcherHp"),
+      setArcherAttack: document.getElementById("setArcherAttack"),
+      setArcherAttackInterval: document.getElementById("setArcherAttackInterval"),
+      setArcherRange: document.getElementById("setArcherRange"),
+      setHeroAllyCost: document.getElementById("setHeroAllyCost"),
+      setHeroAllyHp: document.getElementById("setHeroAllyHp"),
+      setHeroAllyAttack: document.getElementById("setHeroAllyAttack"),
+      setHeroAllyMove: document.getElementById("setHeroAllyMove"),
+      setHeroAllyHealAmount: document.getElementById("setHeroAllyHealAmount"),
+      setHeroAllyHealRange: document.getElementById("setHeroAllyHealRange"),
+      setHeroAllyHealInterval: document.getElementById("setHeroAllyHealInterval"),
+      setHeroEnemySpawnAt: document.getElementById("setHeroEnemySpawnAt"),
+      setHeroEnemyHp: document.getElementById("setHeroEnemyHp"),
+      setHeroEnemyAttack: document.getElementById("setHeroEnemyAttack"),
+      setHeroEnemyMove: document.getElementById("setHeroEnemyMove"),
+      setHeroEnemyHealAmount: document.getElementById("setHeroEnemyHealAmount"),
+      setHeroEnemyHealRange: document.getElementById("setHeroEnemyHealRange"),
+      setHeroEnemyHealInterval: document.getElementById("setHeroEnemyHealInterval"),
       setMusicVolume: document.getElementById("setMusicVolume"),
       setSfxVolume: document.getElementById("setSfxVolume"),
+      saveSettingsBtn: document.getElementById("saveSettingsBtn"),
+      loadSettingsBtn: document.getElementById("loadSettingsBtn"),
+      exportSettingsBtn: document.getElementById("exportSettingsBtn"),
+      importSettingsBtn: document.getElementById("importSettingsBtn"),
+      exportRecordsBtn: document.getElementById("exportRecordsBtn"),
+      clearRecordsBtn: document.getElementById("clearRecordsBtn"),
+      settingsFileInput: document.getElementById("settingsFileInput"),
+      settingsStatus: document.getElementById("settingsStatus"),
     };
 
     let audioCtx;
@@ -530,19 +804,40 @@
       core = null;
       selectedAction = "slime";
       mana = settings.initialMana;
+      digPower = settings.digPowerMax;
       coreHp = settings.coreHp;
       phase = "準備階段";
       message = "先用初始魔素配置史萊姆與地形，準備好後按下開始進攻。";
       enemies = [];
       slimes = [];
       archers = [];
+      alliedHero = null;
       floatingTexts = [];
+      visualEffects = [];
       spawnedCount = 0;
       killedCount = 0;
       spawnTimer = 0;
       uiRefreshTimer = 0;
+      manaRegenTimer = 0;
+      digPowerRegenTimer = 0;
+      slimeCooldownRemaining = 0;
+      archerCooldownRemaining = 0;
+      enemyIntel = createEnemyIntel();
+      hoverCell = null;
       lastTime = performance.now();
       gameOver = false;
+      digCount = 0;
+      blockCount = 0;
+      summonedSlimeCount = 0;
+      summonedArcherCount = 0;
+      summonedHeroCount = 0;
+      alliedHeroUsed = false;
+      alliedHeroDead = false;
+      enemyHeroSpawned = false;
+      manaGainedFromDig = 0;
+      manaGainedFromRegen = 0;
+      matchStartedAt = null;
+      matchEndedRecorded = false;
 
       for (let y = 0; y < ROWS; y++) {
         const row = [];
@@ -579,42 +874,55 @@
       ensureAudio();
       phase = "進攻階段";
       spawnTimer = 1.2;
+      matchStartedAt = performance.now();
       setMessage("人類冒險者開始入侵。用史萊姆卡住通道，讓弓手在後方輸出。");
       updateUI();
     }
 
     function selectAction(action) {
       selectedAction = action;
-      const names = { dig: "挖掘", block: "封路", slime: "召喚史萊姆", archer: "召喚弓手" };
+      const names = { dig: "挖掘", block: "封路", slime: "召喚史萊姆", archer: "召喚弓手", hero: "召喚艾爾", core: "移動核心" };
       setMessage(`目前選擇：${names[action]}。點選地圖格子執行。`);
       updateButtons();
     }
 
     function updateButtons() {
-      [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn].forEach((button) => {
+      [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn, ui.heroBtn, ui.coreBtn].forEach((button) => {
         button.classList.toggle("active", button.dataset.action === selectedAction);
       });
       ui.startBtn.disabled = phase !== "準備階段" || gameOver;
+      ui.digBtn.disabled = digPower < settings.digPowerCost || gameOver;
+      ui.slimeBtn.disabled = slimeCooldownRemaining > 0;
+      ui.archerBtn.disabled = archerCooldownRemaining > 0;
+      ui.heroBtn.disabled = alliedHeroUsed || alliedHeroDead || gameOver;
+      ui.coreBtn.disabled = phase !== "準備階段" || gameOver;
     }
 
     function updateUI() {
       ui.phaseBadge.textContent = phase;
       ui.message.textContent = message;
       ui.manaText.textContent = mana;
+      ui.digPowerText.textContent = `${Math.floor(digPower)} / ${settings.digPowerMax}`;
       ui.coreText.textContent = `${Math.max(0, Math.ceil(coreHp))} / ${settings.coreHp}`;
       ui.coreBar.style.width = `${Math.max(0, coreHp / settings.coreHp) * 100}%`;
       ui.spawnText.textContent = `${spawnedCount} / ${settings.enemyCount}`;
       ui.enemyText.textContent = enemies.length;
       ui.killText.textContent = killedCount;
       document.getElementById("debugState").textContent = JSON.stringify(getDebugState());
+      syncCostLabels();
       updateButtons();
     }
 
     function syncCostLabels() {
       ui.digBtn.textContent = `挖掘 ${settings.digCost}`;
+      if (settings.digPowerCost > 0) ui.digBtn.textContent += `・挖掘力${settings.digPowerCost}`;
       ui.blockBtn.textContent = `封路 ${settings.blockCost}`;
-      ui.slimeBtn.textContent = `召喚史萊姆 ${settings.slimeCost}`;
-      ui.archerBtn.textContent = `召喚弓手 ${settings.archerCost}`;
+      const slimeCd = slimeCooldownRemaining > 0 ? ` 冷卻 ${slimeCooldownRemaining.toFixed(1)}s` : "";
+      const archerCd = archerCooldownRemaining > 0 ? ` 冷卻 ${archerCooldownRemaining.toFixed(1)}s` : "";
+      ui.slimeBtn.textContent = `召喚史萊姆 ${settings.slimeCost}${slimeCd}`;
+      ui.archerBtn.textContent = `召喚弓手 ${settings.archerCost}${archerCd}`;
+      ui.heroBtn.textContent = alliedHeroUsed || alliedHeroDead ? "艾爾已出戰" : `召喚艾爾 ${settings.heroAllyCost}`;
+      ui.coreBtn.textContent = "移動核心";
     }
 
     function openSettings() {
@@ -623,35 +931,286 @@
       ui.setEnemyCount.value = settings.enemyCount;
       ui.setSpawnInterval.value = settings.spawnInterval;
       ui.setDigCost.value = settings.digCost;
+      ui.setDigPowerMax.value = settings.digPowerMax;
+      ui.setDigPowerCost.value = settings.digPowerCost;
+      ui.setDigPowerRegenInterval.value = settings.digPowerRegenInterval;
+      ui.setDigPowerRegenAmount.value = settings.digPowerRegenAmount;
       ui.setBlockCost.value = settings.blockCost;
       ui.setSlimeCost.value = settings.slimeCost;
       ui.setArcherCost.value = settings.archerCost;
+      ui.setSlimeCooldown.value = settings.slimeCooldown;
+      ui.setArcherCooldown.value = settings.archerCooldown;
+      ui.setManaRegenEnabled.checked = settings.manaRegenEnabled;
+      ui.setManaRegenInterval.value = settings.manaRegenInterval;
+      ui.setManaRegenAmount.value = settings.manaRegenAmount;
+      ui.setEnemyReward.value = settings.enemyReward;
+      ui.setDigEmptyChance.value = settings.digEmptyChance;
+      ui.setDigSmallChance.value = settings.digSmallChance;
+      ui.setDigSmallMin.value = settings.digSmallMin;
+      ui.setDigSmallMax.value = settings.digSmallMax;
+      ui.setDigBigMin.value = settings.digBigMin;
+      ui.setDigBigMax.value = settings.digBigMax;
+      ui.setCoreVision.value = settings.coreVision;
+      ui.setEnemyAttackInterval.value = settings.enemyAttackInterval;
+      ui.setStuckSeconds.value = settings.stuckSeconds;
+      ui.setBreakthroughSeconds.value = settings.breakthroughSeconds;
+      ui.setProgressCheckInterval.value = settings.progressCheckInterval;
+      ui.setCoreMinDistance.value = settings.coreMinDistance;
+      ui.setSoldierHp.value = settings.soldierHp;
+      ui.setSoldierAttack.value = settings.soldierAttack;
+      ui.setSoldierMove.value = settings.soldierMove;
+      ui.setRogueHp.value = settings.rogueHp;
+      ui.setRogueAttack.value = settings.rogueAttack;
+      ui.setRogueMove.value = settings.rogueMove;
+      ui.setBruteHp.value = settings.bruteHp;
+      ui.setBruteAttack.value = settings.bruteAttack;
+      ui.setBruteMove.value = settings.bruteMove;
+      ui.setSlimeHp.value = settings.slimeHp;
+      ui.setSlimeAttack.value = settings.slimeAttack;
+      ui.setSlimeAttackInterval.value = settings.slimeAttackInterval;
+      ui.setArcherHp.value = settings.archerHp;
+      ui.setArcherAttack.value = settings.archerAttack;
+      ui.setArcherAttackInterval.value = settings.archerAttackInterval;
+      ui.setArcherRange.value = settings.archerRange;
+      ui.setHeroAllyCost.value = settings.heroAllyCost;
+      ui.setHeroAllyHp.value = settings.heroAllyHp;
+      ui.setHeroAllyAttack.value = settings.heroAllyAttack;
+      ui.setHeroAllyMove.value = settings.heroAllyMove;
+      ui.setHeroAllyHealAmount.value = settings.heroAllyHealAmount;
+      ui.setHeroAllyHealRange.value = settings.heroAllyHealRange;
+      ui.setHeroAllyHealInterval.value = settings.heroAllyHealInterval;
+      ui.setHeroEnemySpawnAt.value = settings.heroEnemySpawnAt;
+      ui.setHeroEnemyHp.value = settings.heroEnemyHp;
+      ui.setHeroEnemyAttack.value = settings.heroEnemyAttack;
+      ui.setHeroEnemyMove.value = settings.heroEnemyMove;
+      ui.setHeroEnemyHealAmount.value = settings.heroEnemyHealAmount;
+      ui.setHeroEnemyHealRange.value = settings.heroEnemyHealRange;
+      ui.setHeroEnemyHealInterval.value = settings.heroEnemyHealInterval;
       ui.setMusicVolume.value = settings.musicVolume;
       ui.setSfxVolume.value = settings.sfxVolume;
+      setSettingsStatus("");
       ui.settingsDialog.showModal();
     }
 
     function applySettings() {
-      settings = {
+      settings = collectSettingsFromForm();
+      saveSettingsToStorage(settings);
+      updateAudioVolumes();
+      init();
+      setMessage("設定已套用並保存，關卡已重新開始。");
+    }
+
+    function collectSettingsFromForm() {
+      return normalizeSettings({
         initialMana: readNumber(ui.setInitialMana, DEFAULT_SETTINGS.initialMana),
         coreHp: readNumber(ui.setCoreHp, DEFAULT_SETTINGS.coreHp),
         enemyCount: readNumber(ui.setEnemyCount, DEFAULT_SETTINGS.enemyCount),
         spawnInterval: readNumber(ui.setSpawnInterval, DEFAULT_SETTINGS.spawnInterval),
         digCost: readNumber(ui.setDigCost, DEFAULT_SETTINGS.digCost),
+        digPowerMax: readNumber(ui.setDigPowerMax, DEFAULT_SETTINGS.digPowerMax),
+        digPowerCost: readNumber(ui.setDigPowerCost, DEFAULT_SETTINGS.digPowerCost),
+        digPowerRegenInterval: readNumber(ui.setDigPowerRegenInterval, DEFAULT_SETTINGS.digPowerRegenInterval),
+        digPowerRegenAmount: readNumber(ui.setDigPowerRegenAmount, DEFAULT_SETTINGS.digPowerRegenAmount),
         blockCost: readNumber(ui.setBlockCost, DEFAULT_SETTINGS.blockCost),
         slimeCost: readNumber(ui.setSlimeCost, DEFAULT_SETTINGS.slimeCost),
         archerCost: readNumber(ui.setArcherCost, DEFAULT_SETTINGS.archerCost),
+        slimeCooldown: readNumber(ui.setSlimeCooldown, DEFAULT_SETTINGS.slimeCooldown),
+        archerCooldown: readNumber(ui.setArcherCooldown, DEFAULT_SETTINGS.archerCooldown),
+        manaRegenEnabled: ui.setManaRegenEnabled.checked,
+        manaRegenInterval: readNumber(ui.setManaRegenInterval, DEFAULT_SETTINGS.manaRegenInterval),
+        manaRegenAmount: readNumber(ui.setManaRegenAmount, DEFAULT_SETTINGS.manaRegenAmount),
+        enemyReward: readNumber(ui.setEnemyReward, DEFAULT_SETTINGS.enemyReward),
+        digEmptyChance: readNumber(ui.setDigEmptyChance, DEFAULT_SETTINGS.digEmptyChance),
+        digSmallChance: readNumber(ui.setDigSmallChance, DEFAULT_SETTINGS.digSmallChance),
+        digSmallMin: readNumber(ui.setDigSmallMin, DEFAULT_SETTINGS.digSmallMin),
+        digSmallMax: readNumber(ui.setDigSmallMax, DEFAULT_SETTINGS.digSmallMax),
+        digBigMin: readNumber(ui.setDigBigMin, DEFAULT_SETTINGS.digBigMin),
+        digBigMax: readNumber(ui.setDigBigMax, DEFAULT_SETTINGS.digBigMax),
+        coreVision: readNumber(ui.setCoreVision, DEFAULT_SETTINGS.coreVision),
+        enemyAttackInterval: readNumber(ui.setEnemyAttackInterval, DEFAULT_SETTINGS.enemyAttackInterval),
+        stuckSeconds: readNumber(ui.setStuckSeconds, DEFAULT_SETTINGS.stuckSeconds),
+        breakthroughSeconds: readNumber(ui.setBreakthroughSeconds, DEFAULT_SETTINGS.breakthroughSeconds),
+        progressCheckInterval: readNumber(ui.setProgressCheckInterval, DEFAULT_SETTINGS.progressCheckInterval),
+        coreMinDistance: readNumber(ui.setCoreMinDistance, DEFAULT_SETTINGS.coreMinDistance),
+        soldierHp: readNumber(ui.setSoldierHp, DEFAULT_SETTINGS.soldierHp),
+        soldierAttack: readNumber(ui.setSoldierAttack, DEFAULT_SETTINGS.soldierAttack),
+        soldierMove: readNumber(ui.setSoldierMove, DEFAULT_SETTINGS.soldierMove),
+        rogueHp: readNumber(ui.setRogueHp, DEFAULT_SETTINGS.rogueHp),
+        rogueAttack: readNumber(ui.setRogueAttack, DEFAULT_SETTINGS.rogueAttack),
+        rogueMove: readNumber(ui.setRogueMove, DEFAULT_SETTINGS.rogueMove),
+        bruteHp: readNumber(ui.setBruteHp, DEFAULT_SETTINGS.bruteHp),
+        bruteAttack: readNumber(ui.setBruteAttack, DEFAULT_SETTINGS.bruteAttack),
+        bruteMove: readNumber(ui.setBruteMove, DEFAULT_SETTINGS.bruteMove),
+        slimeHp: readNumber(ui.setSlimeHp, DEFAULT_SETTINGS.slimeHp),
+        slimeAttack: readNumber(ui.setSlimeAttack, DEFAULT_SETTINGS.slimeAttack),
+        slimeAttackInterval: readNumber(ui.setSlimeAttackInterval, DEFAULT_SETTINGS.slimeAttackInterval),
+        archerHp: readNumber(ui.setArcherHp, DEFAULT_SETTINGS.archerHp),
+        archerAttack: readNumber(ui.setArcherAttack, DEFAULT_SETTINGS.archerAttack),
+        archerAttackInterval: readNumber(ui.setArcherAttackInterval, DEFAULT_SETTINGS.archerAttackInterval),
+        archerRange: readNumber(ui.setArcherRange, DEFAULT_SETTINGS.archerRange),
+        heroAllyCost: readNumber(ui.setHeroAllyCost, DEFAULT_SETTINGS.heroAllyCost),
+        heroAllyHp: readNumber(ui.setHeroAllyHp, DEFAULT_SETTINGS.heroAllyHp),
+        heroAllyAttack: readNumber(ui.setHeroAllyAttack, DEFAULT_SETTINGS.heroAllyAttack),
+        heroAllyMove: readNumber(ui.setHeroAllyMove, DEFAULT_SETTINGS.heroAllyMove),
+        heroAllyHealAmount: readNumber(ui.setHeroAllyHealAmount, DEFAULT_SETTINGS.heroAllyHealAmount),
+        heroAllyHealRange: readNumber(ui.setHeroAllyHealRange, DEFAULT_SETTINGS.heroAllyHealRange),
+        heroAllyHealInterval: readNumber(ui.setHeroAllyHealInterval, DEFAULT_SETTINGS.heroAllyHealInterval),
+        heroEnemySpawnAt: readNumber(ui.setHeroEnemySpawnAt, DEFAULT_SETTINGS.heroEnemySpawnAt),
+        heroEnemyHp: readNumber(ui.setHeroEnemyHp, DEFAULT_SETTINGS.heroEnemyHp),
+        heroEnemyAttack: readNumber(ui.setHeroEnemyAttack, DEFAULT_SETTINGS.heroEnemyAttack),
+        heroEnemyMove: readNumber(ui.setHeroEnemyMove, DEFAULT_SETTINGS.heroEnemyMove),
+        heroEnemyHealAmount: readNumber(ui.setHeroEnemyHealAmount, DEFAULT_SETTINGS.heroEnemyHealAmount),
+        heroEnemyHealRange: readNumber(ui.setHeroEnemyHealRange, DEFAULT_SETTINGS.heroEnemyHealRange),
+        heroEnemyHealInterval: readNumber(ui.setHeroEnemyHealInterval, DEFAULT_SETTINGS.heroEnemyHealInterval),
         musicVolume: readNumber(ui.setMusicVolume, DEFAULT_SETTINGS.musicVolume),
         sfxVolume: readNumber(ui.setSfxVolume, DEFAULT_SETTINGS.sfxVolume),
-      };
-      updateAudioVolumes();
-      init();
-      setMessage("設定已套用，關卡已重新開始。");
+      });
     }
 
     function readNumber(input, fallback) {
       const value = Number(input.value);
       return Number.isFinite(value) ? value : fallback;
+    }
+
+    function normalizeSettings(source = {}) {
+      const normalized = { ...DEFAULT_SETTINGS };
+      for (const key of SETTING_KEYS) {
+        if (!(key in source)) continue;
+        if (typeof DEFAULT_SETTINGS[key] === "boolean") {
+          normalized[key] = Boolean(source[key]);
+        } else {
+          const value = Number(source[key]);
+          if (Number.isFinite(value)) normalized[key] = value;
+        }
+      }
+      return normalized;
+    }
+
+    function loadSettingsFromStorage() {
+      const stored = safeLoadJson(STORAGE_KEYS.settings, null);
+      return normalizeSettings(stored || DEFAULT_SETTINGS);
+    }
+
+    function saveSettingsToStorage(nextSettings) {
+      return safeSaveJson(STORAGE_KEYS.settings, normalizeSettings(nextSettings));
+    }
+
+    function getMatchRecords() {
+      const records = safeLoadJson(STORAGE_KEYS.records, []);
+      return Array.isArray(records) ? records : [];
+    }
+
+    function saveMatchRecords(records) {
+      safeSaveJson(STORAGE_KEYS.records, records.slice(-100));
+    }
+
+    function safeLoadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function safeSaveJson(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (error) {
+        setSettingsStatus("瀏覽器拒絕寫入本機儲存。");
+        return false;
+      }
+    }
+
+    function setSettingsStatus(text) {
+      if (ui.settingsStatus) ui.settingsStatus.textContent = text;
+    }
+
+    function downloadJson(filename, data) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function timestampForFile() {
+      return new Date().toISOString().replace(/[:.]/g, "-");
+    }
+
+    function fillSettingsForm(nextSettings) {
+      const filledSettings = normalizeSettings(nextSettings);
+      for (const key of SETTING_KEYS) {
+        const input = ui[`set${key[0].toUpperCase()}${key.slice(1)}`];
+        if (!input) continue;
+        if (input.type === "checkbox") {
+          input.checked = Boolean(filledSettings[key]);
+        } else {
+          input.value = filledSettings[key];
+        }
+      }
+    }
+
+    function saveCurrentSettingsFromForm() {
+      const nextSettings = collectSettingsFromForm();
+      if (saveSettingsToStorage(nextSettings)) {
+        setSettingsStatus("目前參數已儲存，按「套用並重開」後生效。");
+      }
+    }
+
+    function loadSavedSettingsIntoForm() {
+      const savedSettings = loadSettingsFromStorage();
+      fillSettingsForm(savedSettings);
+      setSettingsStatus("已載入儲存參數，按「套用並重開」後生效。");
+    }
+
+    function exportCurrentSettings() {
+      const data = {
+        exportedAt: new Date().toISOString(),
+        game: "時之權能：魔界之戰 Prototype",
+        settings: collectSettingsFromForm(),
+      };
+      downloadJson(`time-authority-settings-${timestampForFile()}.json`, data);
+      setSettingsStatus("參數 JSON 已匯出。");
+    }
+
+    function importSettingsFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        try {
+          const parsed = JSON.parse(String(reader.result));
+          const importedSettings = normalizeSettings(parsed.settings || parsed);
+          fillSettingsForm(importedSettings);
+          saveSettingsToStorage(importedSettings);
+          setSettingsStatus("參數已匯入並儲存，按「套用並重開」後生效。");
+        } catch (error) {
+          setSettingsStatus("匯入失敗，請確認檔案是參數 JSON。");
+        } finally {
+          ui.settingsFileInput.value = "";
+        }
+      });
+      reader.readAsText(file);
+    }
+
+    function exportMatchRecords() {
+      const records = getMatchRecords();
+      downloadJson(`time-authority-records-${timestampForFile()}.json`, {
+        exportedAt: new Date().toISOString(),
+        game: "時之權能：魔界之戰 Prototype",
+        records,
+      });
+      setSettingsStatus(`已匯出 ${records.length} 筆對局紀錄。`);
+    }
+
+    function clearMatchRecords() {
+      saveMatchRecords([]);
+      setSettingsStatus("對局紀錄已清空。");
     }
 
     function ensureAudio() {
@@ -708,6 +1267,17 @@
       setTimeout(() => playTone(130, 0.12, "sawtooth", sfxGain, 0.08), 70);
     }
 
+    function playHeroArrivalSound() {
+      [392, 587, 784].forEach((freq, index) => {
+        setTimeout(() => playTone(freq, 0.16, "triangle", sfxGain, 0.13), index * 85);
+      });
+    }
+
+    function playHealSound() {
+      playTone(523, 0.08, "sine", sfxGain, 0.07);
+      setTimeout(() => playTone(659, 0.09, "sine", sfxGain, 0.05), 55);
+    }
+
     function playVictorySound() {
       [262, 330, 392, 523].forEach((freq, index) => {
         setTimeout(() => playTone(freq, 0.24, "triangle", sfxGain, 0.16), index * 110);
@@ -720,16 +1290,91 @@
       });
     }
 
+    function createEnemyIntel() {
+      return {
+        coreDiscovered: false,
+        mode: "explore",
+        knownTiles: new Set(),
+        progressTimer: 0,
+        stuckTimer: 0,
+        breakthroughTimer: 0,
+        lastBestDistance: Infinity,
+        lastCoreHp: settings.coreHp,
+      };
+    }
+
+    function updateEnemyIntel(dt) {
+      for (const enemy of enemies) {
+        revealAround(enemy, settings.coreVision);
+        if (!enemyIntel.coreDiscovered && canEnemySeeCore(enemy)) {
+          enemyIntel.coreDiscovered = true;
+          enemyIntel.mode = "assault";
+          setMessage("入侵者發現核心位置了，敵方情報已共享。");
+        }
+      }
+
+      enemyIntel.progressTimer += dt;
+      if (enemyIntel.progressTimer < settings.progressCheckInterval) return;
+      enemyIntel.progressTimer = 0;
+
+      const bestDistance = enemies.length ? Math.min(...enemies.map((enemy) => distanceToCore(enemy))) : Infinity;
+      const madeProgress = bestDistance < enemyIntel.lastBestDistance || coreHp < enemyIntel.lastCoreHp;
+      if (madeProgress) {
+        enemyIntel.stuckTimer = 0;
+        if (enemyIntel.mode === "breakthrough") enemyIntel.mode = enemyIntel.coreDiscovered ? "assault" : "explore";
+      } else if (enemies.length > 0) {
+        enemyIntel.stuckTimer += settings.progressCheckInterval;
+      }
+      enemyIntel.lastBestDistance = bestDistance;
+      enemyIntel.lastCoreHp = coreHp;
+
+      if (enemyIntel.stuckTimer >= settings.stuckSeconds) {
+        enemyIntel.mode = "breakthrough";
+        enemyIntel.breakthroughTimer = settings.breakthroughSeconds;
+        enemyIntel.stuckTimer = 0;
+        for (const enemy of enemies) enemy.path = [];
+        setMessage("敵方攻勢受阻，開始搜尋其他突破口。");
+      }
+
+      if (enemyIntel.mode === "breakthrough") {
+        enemyIntel.breakthroughTimer -= settings.progressCheckInterval;
+        if (enemyIntel.breakthroughTimer <= 0) {
+          enemyIntel.mode = enemyIntel.coreDiscovered ? "assault" : "explore";
+        }
+      }
+    }
+
+    function revealAround(unit, radius) {
+      for (let y = Math.max(0, unit.y - radius); y <= Math.min(ROWS - 1, unit.y + radius); y++) {
+        for (let x = Math.max(0, unit.x - radius); x <= Math.min(COLS - 1, unit.x + radius); x++) {
+          if (manhattan(unit, { x, y }) <= radius && hasLineOfSight(unit, { x, y })) {
+            enemyIntel.knownTiles.add(`${x},${y}`);
+          }
+        }
+      }
+    }
+
+    function canEnemySeeCore(enemy) {
+      return manhattan(enemy, core) <= settings.coreVision && hasLineOfSight(enemy, core);
+    }
+
     function getDebugState() {
       return {
         phase,
         mana,
+        digPower,
         coreHp,
         spawnedCount,
         killedCount,
+        intel: {
+          coreDiscovered: enemyIntel?.coreDiscovered,
+          mode: enemyIntel?.mode,
+          knownTiles: enemyIntel?.knownTiles?.size,
+        },
         enemies: enemies.map((enemy) => ({ type: enemy.type, x: enemy.x, y: enemy.y, hp: enemy.hp, pathLen: enemy.path.length })),
         slimes: slimes.map((slime) => ({ x: slime.x, y: slime.y, hp: slime.hp })),
         archers: archers.map((archer) => ({ x: archer.x, y: archer.y, hp: archer.hp })),
+        alliedHero: alliedHero ? { x: alliedHero.x, y: alliedHero.y, hp: alliedHero.hp } : null,
       };
     }
 
@@ -794,7 +1439,7 @@
     }
 
     function monsterAt(x, y) {
-      return slimeAt(x, y) || archerAt(x, y);
+      return slimeAt(x, y) || archerAt(x, y) || (alliedHero && alliedHero.x === x && alliedHero.y === y ? alliedHero : null);
     }
 
     function canStandOn(x, y, options = {}) {
@@ -839,7 +1484,7 @@
 
     function recomputePaths() {
       for (const enemy of enemies) {
-        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+        enemy.path = enemyIntel ? planEnemyPath(enemy) : [];
       }
       previewPath = findPath(entrance, core, { ignoreUnits: true });
     }
@@ -853,6 +1498,21 @@
       return true;
     }
 
+    function rollDigMana() {
+      const roll = Math.random();
+      if (roll < settings.digEmptyChance) return 0;
+      if (roll < settings.digEmptyChance + settings.digSmallChance) {
+        return randomInt(settings.digSmallMin, settings.digSmallMax);
+      }
+      return randomInt(settings.digBigMin, settings.digBigMax);
+    }
+
+    function randomInt(min, max) {
+      const low = Math.ceil(Math.min(min, max));
+      const high = Math.floor(Math.max(min, max));
+      return low + Math.floor(Math.random() * (high - low + 1));
+    }
+
     function handleTileClick(x, y) {
       if (gameOver) return;
       ensureAudio();
@@ -862,6 +1522,8 @@
       if (selectedAction === "block") blockTile(x, y);
       if (selectedAction === "slime") summonSlime(x, y);
       if (selectedAction === "archer") summonArcher(x, y);
+      if (selectedAction === "hero") summonAlliedHero(x, y);
+      if (selectedAction === "core") moveCore(x, y);
       updateUI();
     }
 
@@ -874,10 +1536,23 @@
         setMessage("邊界牆不可挖掘。");
         return;
       }
+      if (digPower < settings.digPowerCost) {
+        setMessage("挖掘力不足。進攻階段會隨時間恢復。");
+        return;
+      }
       if (!spend(settings.digCost)) return;
+      digPower -= settings.digPowerCost;
       grid[y][x] = TILE_TYPE.ROAD;
+      const foundMana = rollDigMana();
+      if (foundMana > 0) {
+        mana += foundMana;
+        manaGainedFromDig += foundMana;
+        spawnFloatingText(`+${foundMana}`, x, y, "#8fe68f");
+      }
+      digCount++;
       recomputePaths();
-      setMessage("挖出新的道路，敵人已重新判斷路線。");
+      const result = foundMana > 0 ? `挖到 ${foundMana} 魔素，但地下城破口變大了。` : "這面牆是空的，只留下新的破口。";
+      setMessage(result);
     }
 
     function blockTile(x, y) {
@@ -901,8 +1576,51 @@
       }
       if (!spend(settings.blockCost)) return;
       grid[y][x] = TILE_TYPE.WALL;
+      blockCount++;
       recomputePaths();
       setMessage("道路已封閉，入侵者將被迫改道。");
+    }
+
+    function moveCore(x, y) {
+      if (phase !== "準備階段") {
+        setMessage("開始進攻後不能移動核心。");
+        return;
+      }
+      if (isSame({ x, y }, entrance)) {
+        setMessage("核心不能放在入口。");
+        return;
+      }
+      if (unitAt(x, y)) {
+        setMessage("有單位停在這格，不能放置核心。");
+        return;
+      }
+      if (manhattan(entrance, { x, y }) < settings.coreMinDistance) {
+        setMessage(`核心離入口太近，至少需要 ${settings.coreMinDistance} 格距離。`);
+        return;
+      }
+      if (grid[y][x] !== TILE_TYPE.ROAD) {
+        setMessage("核心只能移動到既有的普通道路上。");
+        return;
+      }
+
+      const oldCore = { ...core };
+      const oldTargetType = grid[y][x];
+      grid[oldCore.y][oldCore.x] = TILE_TYPE.ROAD;
+      grid[y][x] = TILE_TYPE.CORE;
+      const routeStillExists = findPath(entrance, { x, y }, { ignoreUnits: true });
+
+      if (!routeStillExists) {
+        grid[y][x] = oldTargetType;
+        grid[oldCore.y][oldCore.x] = TILE_TYPE.CORE;
+        setMessage("這個位置沒有可通行路線，核心放不過去。");
+        return;
+      }
+
+      core = { x, y };
+      coreHp = settings.coreHp;
+      enemyIntel = createEnemyIntel();
+      recomputePaths();
+      setMessage("核心位置已更新。進攻開始後，敵人仍需要先探索到核心。");
     }
 
     function summonSlime(x, y) {
@@ -914,13 +1632,17 @@
         setMessage("這格已經有單位。");
         return;
       }
+      if (phase === "進攻階段" && slimeCooldownRemaining > 0) {
+        setMessage(`史萊姆召喚冷卻中：${slimeCooldownRemaining.toFixed(1)} 秒。`);
+        return;
+      }
       if (!spend(settings.slimeCost)) return;
       slimes.push({
         x,
         y,
-        hp: 45,
-        maxHp: 45,
-        attack: 8,
+        hp: settings.slimeHp,
+        maxHp: settings.slimeHp,
+        attack: settings.slimeAttack,
         attackTimer: 0,
         flash: 0,
         homeX: x,
@@ -928,6 +1650,8 @@
         roamRadius: 3,
         roamTimer: 0.4,
       });
+      slimeCooldownRemaining = phase === "進攻階段" ? settings.slimeCooldown : 0;
+      summonedSlimeCount++;
       recomputePaths();
       setMessage("史萊姆已召喚。它會擋住通道並攻擊相鄰敵人。");
     }
@@ -941,14 +1665,18 @@
         setMessage("這格已經有單位。");
         return;
       }
+      if (phase === "進攻階段" && archerCooldownRemaining > 0) {
+        setMessage(`弓手召喚冷卻中：${archerCooldownRemaining.toFixed(1)} 秒。`);
+        return;
+      }
       if (!spend(settings.archerCost)) return;
       archers.push({
         x,
         y,
-        hp: 28,
-        maxHp: 28,
-        attack: 9,
-        range: 4,
+        hp: settings.archerHp,
+        maxHp: settings.archerHp,
+        attack: settings.archerAttack,
+        range: settings.archerRange,
         attackTimer: 0,
         flash: 0,
         homeX: x,
@@ -956,8 +1684,47 @@
         roamRadius: 2,
         roamTimer: 0.5,
       });
+      archerCooldownRemaining = phase === "進攻階段" ? settings.archerCooldown : 0;
+      summonedArcherCount++;
       recomputePaths();
       setMessage("弓手已召喚。把它放在史萊姆後方，可以穩定輸出。");
+    }
+
+    function summonAlliedHero(x, y) {
+      if (alliedHeroUsed || alliedHeroDead) {
+        setMessage("艾爾本局已經出戰過，不能再次召喚。");
+        return;
+      }
+      if (grid[y][x] !== TILE_TYPE.ROAD) {
+        setMessage("艾爾只能召喚在普通道路上。");
+        return;
+      }
+      if (unitAt(x, y)) {
+        setMessage("這格已經有單位。");
+        return;
+      }
+      if (!spend(settings.heroAllyCost)) return;
+      alliedHero = {
+        x,
+        y,
+        name: "妖狐神使 艾爾",
+        hp: settings.heroAllyHp,
+        maxHp: settings.heroAllyHp,
+        attack: settings.heroAllyAttack,
+        attackTimer: 0,
+        moveTimer: 0,
+        healTimer: settings.heroAllyHealInterval,
+        flash: 0,
+        homeX: x,
+        homeY: y,
+        roamRadius: 4,
+      };
+      alliedHeroUsed = true;
+      summonedHeroCount++;
+      spawnRingEffect(x, y, settings.heroAllyHealRange, COLORS.alliedHero, 0.65);
+      playHeroArrivalSound();
+      recomputePaths();
+      setMessage("妖狐神使艾爾降臨。她會週期性治療周圍的我方召喚生物。");
     }
 
     function spawnEnemy() {
@@ -971,37 +1738,85 @@
         y: entrance.y,
         type: typeId,
         name: type.name,
-        hp: type.hp,
-        maxHp: type.hp,
-        attack: type.attack,
-        moveInterval: type.moveInterval,
-        reward: type.reward,
+        hp: settings[type.hpKey],
+        maxHp: settings[type.hpKey],
+        attack: settings[type.attackKey],
+        moveInterval: settings[type.moveKey],
+        reward: settings.enemyReward,
         color: type.color,
         label: type.label,
         attackTimer: 0,
         moveTimer: 0,
         path: [],
+        exploreTarget: null,
+        visited: new Set([`${entrance.x},${entrance.y}`]),
         flash: 0,
       };
       enemies.push(enemy);
       spawnedCount++;
-      enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+      enemy.path = [];
+    }
+
+    function spawnEnemyHero() {
+      if (enemyHeroSpawned || unitAt(entrance.x, entrance.y)) return;
+      enemyHeroSpawned = true;
+      const priest = {
+        x: entrance.x,
+        y: entrance.y,
+        type: "enemyHeroPriest",
+        name: "冒險者祭司",
+        hp: settings.heroEnemyHp,
+        maxHp: settings.heroEnemyHp,
+        attack: settings.heroEnemyAttack,
+        moveInterval: settings.heroEnemyMove,
+        reward: settings.enemyReward * 4,
+        color: COLORS.enemyHero,
+        label: "祭",
+        isHero: true,
+        attackTimer: 0,
+        moveTimer: 0,
+        healTimer: settings.heroEnemyHealInterval,
+        path: [],
+        visited: new Set([`${entrance.x},${entrance.y}`]),
+        flash: 0,
+      };
+      enemies.push(priest);
+      spawnRingEffect(priest.x, priest.y, settings.heroEnemyHealRange, COLORS.enemyHero, 0.65);
+      playHeroArrivalSound();
+      setMessage("冒險者祭司加入戰線。敵方部隊開始獲得治療支援。");
     }
 
     function update(dt) {
       if (gameOver) return;
       if (phase === "進攻階段") {
+        slimeCooldownRemaining = Math.max(0, slimeCooldownRemaining - dt);
+        archerCooldownRemaining = Math.max(0, archerCooldownRemaining - dt);
+        updateManaRegen(dt);
+        updateDigPowerRegen(dt);
+      } else {
+        slimeCooldownRemaining = 0;
+        archerCooldownRemaining = 0;
+        manaRegenTimer = 0;
+        digPowerRegenTimer = 0;
+      }
+      if (phase === "進攻階段") {
         spawnTimer -= dt;
+        if (!enemyHeroSpawned && spawnedCount >= settings.heroEnemySpawnAt) {
+          spawnEnemyHero();
+        }
         if (spawnTimer <= 0 && spawnedCount < settings.enemyCount) {
           spawnEnemy();
           spawnTimer += settings.spawnInterval;
         }
+        updateEnemyIntel(dt);
       }
 
       updateMonsterMovement(dt);
+      updateHeroAuras(dt);
       const attackClaims = new Map();
       updateSlimes(dt, attackClaims);
       updateArchers(dt, attackClaims);
+      updateAlliedHeroAttack(dt, attackClaims);
       updateEnemies(dt);
       updateFeedback(dt);
       cleanDeadUnits();
@@ -1013,6 +1828,35 @@
       }
     }
 
+    function updateManaRegen(dt) {
+      if (!settings.manaRegenEnabled || settings.manaRegenAmount <= 0 || settings.manaRegenInterval <= 0) return;
+      manaRegenTimer += dt;
+      if (manaRegenTimer < settings.manaRegenInterval) return;
+      const ticks = Math.floor(manaRegenTimer / settings.manaRegenInterval);
+      manaRegenTimer -= ticks * settings.manaRegenInterval;
+      const gained = ticks * settings.manaRegenAmount;
+      mana += gained;
+      manaGainedFromRegen += gained;
+      spawnFloatingText(`+${gained}`, core.x, core.y, "#8fe68f");
+    }
+
+    function updateDigPowerRegen(dt) {
+      if (settings.digPowerRegenAmount <= 0 || settings.digPowerRegenInterval <= 0) return;
+      if (digPower >= settings.digPowerMax) {
+        digPower = settings.digPowerMax;
+        digPowerRegenTimer = 0;
+        return;
+      }
+      digPowerRegenTimer += dt;
+      if (digPowerRegenTimer < settings.digPowerRegenInterval) return;
+      const ticks = Math.floor(digPowerRegenTimer / settings.digPowerRegenInterval);
+      digPowerRegenTimer -= ticks * settings.digPowerRegenInterval;
+      const before = digPower;
+      digPower = Math.min(settings.digPowerMax, digPower + ticks * settings.digPowerRegenAmount);
+      const gained = digPower - before;
+      if (gained > 0) spawnFloatingText(`挖掘力 +${gained}`, core.x, core.y, "#e8c566");
+    }
+
     function updateMonsterMovement(dt) {
       for (const slime of slimes) {
         updateSlimeMovement(slime, dt);
@@ -1020,6 +1864,33 @@
       for (const archer of archers) {
         updateArcherMovement(archer, dt);
       }
+      if (alliedHero) {
+        updateAlliedHeroMovement(alliedHero, dt);
+      }
+    }
+
+    function updateAlliedHeroMovement(hero, dt) {
+      hero.moveTimer -= dt;
+      if (hero.moveTimer > 0 || enemies.length === 0) return;
+      hero.moveTimer = settings.heroAllyMove;
+
+      const current = { x: hero.x, y: hero.y };
+      const candidates = getMonsterMoveCandidates(hero);
+      const score = (pos) => {
+        let value = -0.15 * manhattan(pos, { x: hero.homeX, y: hero.homeY });
+        for (const ally of [...slimes, ...archers]) {
+          const missing = ally.maxHp - ally.hp;
+          if (missing > 0 && manhattan(pos, ally) <= settings.heroAllyHealRange) value += 5 + missing * 0.08;
+        }
+        for (const enemy of enemies) {
+          const distance = manhattan(pos, enemy);
+          if (distance === 1) value += 6;
+          value -= Math.min(5, distance) * 0.25;
+        }
+        return value;
+      };
+
+      moveMonsterToBestCandidate(hero, candidates, current, score, 1.2);
     }
 
     function updateSlimeMovement(slime, dt) {
@@ -1110,7 +1981,7 @@
         if (targets.length) {
           damageUnit(targets[0], slime.attack, "#e9d26f");
           claimAttack(attackClaims, targets[0]);
-          slime.attackTimer = 1;
+          slime.attackTimer = settings.slimeAttackInterval;
         }
       }
     }
@@ -1134,8 +2005,68 @@
           damageUnit(targets[0], archer.attack, "#ffd66f");
           claimAttack(attackClaims, targets[0]);
           spawnFloatingText("射", archer.x, archer.y, "#ffd66f");
-          archer.attackTimer = 1.25;
+          archer.attackTimer = settings.archerAttackInterval;
         }
+      }
+    }
+
+    function updateAlliedHeroAttack(dt, attackClaims) {
+      if (!alliedHero) return;
+      alliedHero.flash = Math.max(0, (alliedHero.flash || 0) - dt);
+      alliedHero.attackTimer -= dt;
+      if (alliedHero.attackTimer > 0) return;
+
+      const targets = neighbors(alliedHero)
+        .map((p) => enemyAt(p.x, p.y))
+        .filter(Boolean)
+        .sort((a, b) => {
+          if (a.isHero !== b.isHero) return a.isHero ? -1 : 1;
+          return a.hp - b.hp;
+        });
+
+      if (targets.length) {
+        damageUnit(targets[0], alliedHero.attack, "#ffb7ec");
+        claimAttack(attackClaims, targets[0]);
+        alliedHero.attackTimer = settings.slimeAttackInterval;
+      }
+    }
+
+    function updateHeroAuras(dt) {
+      if (alliedHero) {
+        alliedHero.healTimer -= dt;
+        if (alliedHero.healTimer <= 0) {
+          alliedHero.healTimer += settings.heroAllyHealInterval;
+          healUnitsAround(alliedHero, [...slimes, ...archers], settings.heroAllyHealAmount, settings.heroAllyHealRange, COLORS.alliedHero);
+        }
+      }
+
+      for (const enemy of enemies) {
+        if (!enemy.isHero) continue;
+        enemy.healTimer -= dt;
+        if (enemy.healTimer <= 0) {
+          enemy.healTimer += settings.heroEnemyHealInterval;
+          healUnitsAround(enemy, enemies, settings.heroEnemyHealAmount, settings.heroEnemyHealRange, COLORS.enemyHero);
+        }
+      }
+    }
+
+    function healUnitsAround(source, targets, amount, range, color) {
+      if (amount <= 0) return;
+      const healedTargets = targets
+        .filter((target) => target.hp > 0 && manhattan(source, target) <= range && hasLineOfSight(source, target))
+        .filter((target) => target.hp < target.maxHp);
+      if (!healedTargets.length) {
+        spawnRingEffect(source.x, source.y, range, color, 0.45);
+        return;
+      }
+
+      spawnRingEffect(source.x, source.y, range, color, 0.55);
+      playHealSound();
+      for (const target of healedTargets) {
+        const healed = Math.min(amount, target.maxHp - target.hp);
+        target.hp += healed;
+        target.flash = 0.18;
+        spawnFloatingText(`+${Math.ceil(healed)}`, target.x, target.y, COLORS.heal);
       }
     }
 
@@ -1147,10 +2078,15 @@
         enemy.flash = Math.max(0, (enemy.flash || 0) - dt);
         const nextToCore = neighbors(enemy).some((p) => isSame(p, core));
         if (nextToCore) {
+          if (!enemyIntel.coreDiscovered) {
+            enemyIntel.coreDiscovered = true;
+            enemyIntel.mode = "assault";
+            setMessage("入侵者發現核心位置了，敵方情報已共享。");
+          }
           if (enemy.attackTimer <= 0) {
             coreHp -= enemy.attack;
             spawnFloatingText(`-${enemy.attack}`, core.x, core.y, "#ff8f8f");
-            enemy.attackTimer = 1;
+            enemy.attackTimer = settings.enemyAttackInterval;
           }
           continue;
         }
@@ -1179,7 +2115,24 @@
       });
     }
 
+    function spawnRingEffect(x, y, radius, color, life = 0.55) {
+      visualEffects.push({
+        type: "ring",
+        x: x * TILE + TILE / 2,
+        y: y * TILE + TILE / 2,
+        radius: radius * TILE,
+        color,
+        life,
+        maxLife: life,
+      });
+    }
+
     function updateFeedback(dt) {
+      for (const fx of visualEffects) {
+        fx.life -= dt;
+      }
+      visualEffects = visualEffects.filter((fx) => fx.life > 0);
+
       for (const fx of floatingTexts) {
         fx.life -= dt;
         fx.y -= 28 * dt;
@@ -1188,8 +2141,14 @@
     }
 
     function moveEnemy(enemy) {
+      if (canEnemySeeCore(enemy) && !enemyIntel.coreDiscovered) {
+        enemyIntel.coreDiscovered = true;
+        enemyIntel.mode = "assault";
+        setMessage("入侵者發現核心位置了，敵方情報已共享。");
+      }
+
       if (!enemy.path || enemy.path.length === 0) {
-        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+        enemy.path = planEnemyPath(enemy);
       }
       if (!enemy.path.length) return;
 
@@ -1199,19 +2158,73 @@
       if (blockingMonster) {
         if (enemy.attackTimer <= 0) {
           damageUnit(blockingMonster, enemy.attack, "#ff8f8f");
-          enemy.attackTimer = 1;
+          enemy.attackTimer = settings.enemyAttackInterval;
         }
         return;
       }
       if (enemyAt(next.x, next.y)) return;
       if (!canStandOn(next.x, next.y, { allowPosition: { x: enemy.x, y: enemy.y } })) {
-        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+        enemy.path = planEnemyPath(enemy);
         return;
       }
 
       enemy.x = next.x;
       enemy.y = next.y;
+      enemy.visited.add(`${enemy.x},${enemy.y}`);
       enemy.path.shift();
+    }
+
+    function planEnemyPath(enemy) {
+      if (enemyIntel.mode === "breakthrough") {
+        if (enemyIntel.coreDiscovered) {
+          const pathAroundBlockers = findPath(enemy, core, { allowPosition: { x: enemy.x, y: enemy.y } });
+          if (pathAroundBlockers && pathAroundBlockers.length) return pathAroundBlockers;
+        }
+        return chooseExploreStep(enemy, true);
+      }
+
+      if (enemyIntel.coreDiscovered) {
+        return findPath(enemy, core, { ignoreUnits: true }) || [];
+      }
+
+      return chooseExploreStep(enemy, false);
+    }
+
+    function chooseExploreStep(enemy, preferSideRoute) {
+      let best = null;
+      let bestScore = -Infinity;
+      const lastStep = enemy.lastExploreStep || { x: 0, y: 0 };
+
+      for (const step of neighbors(enemy)) {
+        if (!isWalkableType(grid[step.y][step.x])) continue;
+        if (!enemyIntel.coreDiscovered && isSame(step, core)) continue;
+        const key = `${step.x},${step.y}`;
+        const known = enemyIntel.knownTiles.has(key);
+        const visited = enemy.visited.has(key);
+        const blocker = monsterAt(step.x, step.y);
+        const occupied = enemyAt(step.x, step.y);
+        const forward = manhattan(entrance, step) - manhattan(entrance, enemy);
+        const side = Math.abs(step.y - entrance.y) - Math.abs(enemy.y - entrance.y);
+        const reverse = step.x === enemy.x - lastStep.x && step.y === enemy.y - lastStep.y;
+        let score = Math.random() * 3;
+
+        if (!known) score += 22;
+        if (!visited) score += 12;
+        score += Math.max(-1, Math.min(1, forward)) * 2.2;
+        if (preferSideRoute) score += side * 5 + (visited ? -6 : 0);
+        if (blocker) score += preferSideRoute ? -5 : 8;
+        if (occupied) score -= 16;
+        if (reverse) score -= 9;
+
+        if (score > bestScore) {
+          bestScore = score;
+          best = step;
+        }
+      }
+
+      if (!best) return [];
+      enemy.lastExploreStep = { x: best.x - enemy.x, y: best.y - enemy.y };
+      return [best];
     }
 
     function cleanDeadUnits() {
@@ -1220,7 +2233,7 @@
       if (deadEnemies.length > 0) {
         const reward = deadEnemies.reduce((sum, enemy) => sum + enemy.reward, 0);
         killedCount += deadEnemies.length;
-        mana = Math.min(999, mana + reward);
+        mana += reward;
         for (const enemy of deadEnemies) {
           spawnFloatingText(`+${enemy.reward}`, enemy.x, enemy.y, "#8fe68f");
         }
@@ -1233,9 +2246,15 @@
       slimes = slimes.filter((slime) => slime.hp > 0);
       const beforeArchers = archers.length;
       archers = archers.filter((archer) => archer.hp > 0);
-      if (beforeSlimes !== slimes.length || beforeArchers !== archers.length) {
+      const heroDied = alliedHero && alliedHero.hp <= 0;
+      if (heroDied) {
+        spawnRingEffect(alliedHero.x, alliedHero.y, 2, COLORS.alliedHero, 0.55);
+        alliedHero = null;
+        alliedHeroDead = true;
+      }
+      if (beforeSlimes !== slimes.length || beforeArchers !== archers.length || heroDied) {
         playDeathSound();
-        setMessage("魔物被擊倒了，防線出現缺口。");
+        setMessage(heroDied ? "妖狐神使艾爾倒下了，本局無法再次召喚。" : "魔物被擊倒了，防線出現缺口。");
         recomputePaths();
       }
     }
@@ -1245,6 +2264,7 @@
         phase = "核心被摧毀";
         gameOver = true;
         playDefeatSound();
+        recordMatchResult("失敗");
         setMessage("核心被摧毀。這局防衛失敗，可以重新挑戰。");
         return;
       }
@@ -1253,8 +2273,46 @@
         phase = "防衛成功";
         gameOver = true;
         playVictorySound();
+        recordMatchResult("勝利");
         setMessage("防衛成功。史萊姆防線守住了地下城核心。");
       }
+    }
+
+    function recordMatchResult(result) {
+      if (matchEndedRecorded) return;
+      matchEndedRecorded = true;
+      const elapsedSeconds = matchStartedAt ? Math.round((performance.now() - matchStartedAt) / 1000) : 0;
+      const record = {
+        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        endedAt: new Date().toISOString(),
+        result,
+        elapsedSeconds,
+        settings: { ...settings },
+        corePosition: { ...core },
+        final: {
+          mana,
+          digPower,
+          coreHp: Math.max(0, Math.ceil(coreHp)),
+          spawnedCount,
+          killedCount,
+          enemiesRemaining: enemies.length,
+          slimesRemaining: slimes.length,
+          archersRemaining: archers.length,
+          alliedHeroAlive: Boolean(alliedHero),
+        },
+        actions: {
+          digCount,
+          blockCount,
+          summonedSlimeCount,
+          summonedArcherCount,
+          summonedHeroCount,
+          manaGainedFromDig,
+          manaGainedFromRegen,
+        },
+      };
+      const records = getMatchRecords();
+      records.push(record);
+      saveMatchRecords(records);
     }
 
     function distanceToCore(unit) {
@@ -1267,7 +2325,7 @@
 
     function getEnemyNextStep(enemy) {
       if (!enemy.path || enemy.path.length === 0) {
-        enemy.path = findPath(enemy, core, { ignoreUnits: true }) || [];
+        enemy.path = planEnemyPath(enemy);
       }
       return enemy.path[0] || null;
     }
@@ -1288,6 +2346,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawGrid();
       drawPreviewPath();
+      drawPlacementPreview();
       drawUnits();
       drawFeedback();
       requestAnimationFrame(draw);
@@ -1320,6 +2379,20 @@
       }
     }
 
+    function drawPlacementPreview() {
+      if (!hoverCell || (selectedAction !== "archer" && selectedAction !== "hero")) return;
+      if (!isInside(hoverCell.x, hoverCell.y) || grid[hoverCell.y][hoverCell.x] !== TILE_TYPE.ROAD) return;
+      const cx = hoverCell.x * TILE + TILE / 2;
+      const cy = hoverCell.y * TILE + TILE / 2;
+      ctx.beginPath();
+      const range = selectedAction === "hero" ? settings.heroAllyHealRange : settings.archerRange;
+      ctx.arc(cx, cy, range * TILE, 0, Math.PI * 2);
+      ctx.strokeStyle = selectedAction === "hero" ? "rgba(255, 122, 217, 0.68)" : "rgba(215, 180, 90, 0.65)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+
     function drawTileLabel(text, x, y) {
       ctx.fillStyle = COLORS.text;
       ctx.font = "bold 20px Microsoft JhengHei, sans-serif";
@@ -1335,17 +2408,28 @@
       for (const archer of archers) {
         drawUnit(archer, COLORS.archer, "弓");
       }
+      if (alliedHero) {
+        drawUnit(alliedHero, COLORS.alliedHero, "艾", 19, "#ffe7fb");
+      }
       for (const enemy of enemies) {
-        drawUnit(enemy, enemy.color, enemy.label);
+        drawUnit(enemy, enemy.color, enemy.label, enemy.isHero ? 19 : 16, enemy.isHero ? "#fff7c2" : null);
       }
     }
 
-    function drawUnit(unit, color, label) {
+    function drawUnit(unit, color, label, size = 16, outline = null) {
       const cx = unit.x * TILE + TILE / 2;
       const cy = unit.y * TILE + TILE / 2;
+      if (outline) {
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, size + 3, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
       ctx.fillStyle = unit.flash > 0 ? "#ffffff" : color;
       ctx.beginPath();
-      ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+      ctx.arc(cx, cy, size, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 14px Microsoft JhengHei, sans-serif";
@@ -1362,6 +2446,19 @@
     }
 
     function drawFeedback() {
+      for (const fx of visualEffects) {
+        if (fx.type !== "ring") continue;
+        const t = Math.max(0, fx.life / fx.maxLife);
+        ctx.globalAlpha = t * 0.85;
+        ctx.strokeStyle = fx.color;
+        ctx.lineWidth = 2 + (1 - t) * 5;
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, fx.radius * (1.05 - t * 0.18), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1;
+
       ctx.font = "bold 15px Microsoft JhengHei, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -1389,7 +2486,21 @@
       handleTileClick(x, y);
     });
 
-    [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn].forEach((button) => {
+    canvas.addEventListener("mousemove", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      hoverCell = {
+        x: Math.floor(((event.clientX - rect.left) * scaleX) / TILE),
+        y: Math.floor(((event.clientY - rect.top) * scaleY) / TILE),
+      };
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      hoverCell = null;
+    });
+
+    [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn, ui.heroBtn, ui.coreBtn].forEach((button) => {
       button.addEventListener("click", () => selectAction(button.dataset.action));
     });
     ui.startBtn.addEventListener("click", startAttack);
@@ -1406,6 +2517,13 @@
         updateAudioVolumes();
       });
     });
+    ui.saveSettingsBtn.addEventListener("click", saveCurrentSettingsFromForm);
+    ui.loadSettingsBtn.addEventListener("click", loadSavedSettingsIntoForm);
+    ui.exportSettingsBtn.addEventListener("click", exportCurrentSettings);
+    ui.importSettingsBtn.addEventListener("click", () => ui.settingsFileInput.click());
+    ui.settingsFileInput.addEventListener("change", () => importSettingsFile(ui.settingsFileInput.files[0]));
+    ui.exportRecordsBtn.addEventListener("click", exportMatchRecords);
+    ui.clearRecordsBtn.addEventListener("click", clearMatchRecords);
     ui.restartBtn.addEventListener("click", init);
 
     init();
