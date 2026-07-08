@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -159,7 +160,7 @@
       overflow: hidden;
     }
 
-    .hpbar > span {
+    .hpbar>span {
       display: block;
       height: 100%;
       background: linear-gradient(90deg, #d84f5f, #e8c566);
@@ -350,6 +351,7 @@
     }
   </style>
 </head>
+
 <body>
   <main class="app">
     <section class="stage">
@@ -393,6 +395,7 @@
           <button id="heroBtn" data-action="hero">召喚艾爾 90</button>
           <button id="coreBtn" data-action="core">移動核心</button>
           <button class="primary" id="startBtn">開始進攻</button>
+          <button id="speedBtn">速度 1×</button>
           <button id="settingsBtn">設定</button>
           <button class="danger" id="restartBtn">重新開始</button>
         </div>
@@ -431,36 +434,47 @@
         <label class="setting-row">初始魔素 <input type="number" id="setInitialMana" min="0" max="999" step="5"></label>
         <label class="setting-row">核心 HP <input type="number" id="setCoreHp" min="10" max="999" step="10"></label>
         <label class="setting-row">敵人總數 <input type="number" id="setEnemyCount" min="1" max="60" step="1"></label>
-        <label class="setting-row">生成間隔 <input type="number" id="setSpawnInterval" min="0.3" max="5" step="0.05"></label>
+        <label class="setting-row">生成間隔 <input type="number" id="setSpawnInterval" min="0.3" max="5"
+            step="0.05"></label>
         <label class="setting-row">挖掘成本 <input type="number" id="setDigCost" min="0" max="200" step="1"></label>
         <label class="setting-row">最大挖掘力 <input type="number" id="setDigPowerMax" min="0" max="99" step="1"></label>
         <label class="setting-row">挖掘力消耗 <input type="number" id="setDigPowerCost" min="0" max="99" step="1"></label>
-        <label class="setting-row">挖掘力回復間隔 <input type="number" id="setDigPowerRegenInterval" min="0.1" max="120" step="0.1"></label>
-        <label class="setting-row">挖掘力回復量 <input type="number" id="setDigPowerRegenAmount" min="0" max="99" step="1"></label>
+        <label class="setting-row">挖掘力回復間隔 <input type="number" id="setDigPowerRegenInterval" min="0.1" max="120"
+            step="0.1"></label>
+        <label class="setting-row">挖掘力回復量 <input type="number" id="setDigPowerRegenAmount" min="0" max="99"
+            step="1"></label>
         <label class="setting-row">封路成本 <input type="number" id="setBlockCost" min="0" max="200" step="1"></label>
         <label class="setting-row">史萊姆成本 <input type="number" id="setSlimeCost" min="0" max="200" step="1"></label>
         <label class="setting-row">弓手成本 <input type="number" id="setArcherCost" min="0" max="200" step="1"></label>
         <label class="setting-row">史萊姆冷卻 <input type="number" id="setSlimeCooldown" min="0" max="30" step="0.5"></label>
         <label class="setting-row">弓手冷卻 <input type="number" id="setArcherCooldown" min="0" max="30" step="0.5"></label>
         <label class="setting-row">魔素自然回復 <input type="checkbox" id="setManaRegenEnabled"></label>
-        <label class="setting-row">自然回復間隔 <input type="number" id="setManaRegenInterval" min="0.1" max="60" step="0.1"></label>
+        <label class="setting-row">自然回復間隔 <input type="number" id="setManaRegenInterval" min="0.1" max="60"
+            step="0.1"></label>
         <label class="setting-row">自然回復量 <input type="number" id="setManaRegenAmount" min="0" step="1"></label>
         <label class="setting-row">敵人掉落 <input type="number" id="setEnemyReward" min="0" max="50" step="1"></label>
-        <label class="setting-row">挖牆空包率 <input type="number" id="setDigEmptyChance" min="0" max="1" step="0.05"></label>
-        <label class="setting-row">挖牆小礦率 <input type="number" id="setDigSmallChance" min="0" max="1" step="0.05"></label>
+        <label class="setting-row">挖牆空包率 <input type="number" id="setDigEmptyChance" min="0" max="1"
+            step="0.05"></label>
+        <label class="setting-row">挖牆小礦率 <input type="number" id="setDigSmallChance" min="0" max="1"
+            step="0.05"></label>
         <label class="setting-row">小礦最小值 <input type="number" id="setDigSmallMin" min="0" max="100" step="1"></label>
         <label class="setting-row">小礦最大值 <input type="number" id="setDigSmallMax" min="0" max="100" step="1"></label>
         <label class="setting-row">大礦最小值 <input type="number" id="setDigBigMin" min="0" max="200" step="1"></label>
         <label class="setting-row">大礦最大值 <input type="number" id="setDigBigMax" min="0" max="200" step="1"></label>
         <label class="setting-row">核心視野 <input type="number" id="setCoreVision" min="1" max="20" step="1"></label>
-        <label class="setting-row">敵人攻擊間隔 <input type="number" id="setEnemyAttackInterval" min="0.2" max="5" step="0.05"></label>
+        <label class="setting-row">敵人攻擊間隔 <input type="number" id="setEnemyAttackInterval" min="0.2" max="5"
+            step="0.05"></label>
         <label class="setting-row">停滯秒數 <input type="number" id="setStuckSeconds" min="1" max="30" step="0.5"></label>
-        <label class="setting-row">突破秒數 <input type="number" id="setBreakthroughSeconds" min="1" max="30" step="0.5"></label>
-        <label class="setting-row">戰線檢查間隔 <input type="number" id="setProgressCheckInterval" min="0.5" max="10" step="0.5"></label>
-        <label class="setting-row">核心最短距離 <input type="number" id="setCoreMinDistance" min="1" max="60" step="1"></label>
+        <label class="setting-row">突破秒數 <input type="number" id="setBreakthroughSeconds" min="1" max="30"
+            step="0.5"></label>
+        <label class="setting-row">戰線檢查間隔 <input type="number" id="setProgressCheckInterval" min="0.5" max="10"
+            step="0.5"></label>
+        <label class="setting-row">核心最短距離 <input type="number" id="setCoreMinDistance" min="1" max="60"
+            step="1"></label>
         <label class="setting-row">劍士 HP <input type="number" id="setSoldierHp" min="1" max="999" step="1"></label>
         <label class="setting-row">劍士攻擊 <input type="number" id="setSoldierAttack" min="1" max="99" step="1"></label>
-        <label class="setting-row">劍士移動間隔 <input type="number" id="setSoldierMove" min="0.1" max="5" step="0.05"></label>
+        <label class="setting-row">劍士移動間隔 <input type="number" id="setSoldierMove" min="0.1" max="5"
+            step="0.05"></label>
         <label class="setting-row">盜賊 HP <input type="number" id="setRogueHp" min="1" max="999" step="1"></label>
         <label class="setting-row">盜賊攻擊 <input type="number" id="setRogueAttack" min="1" max="99" step="1"></label>
         <label class="setting-row">盜賊移動間隔 <input type="number" id="setRogueMove" min="0.1" max="5" step="0.05"></label>
@@ -469,10 +483,12 @@
         <label class="setting-row">重甲移動間隔 <input type="number" id="setBruteMove" min="0.1" max="5" step="0.05"></label>
         <label class="setting-row">史萊姆 HP <input type="number" id="setSlimeHp" min="1" max="999" step="1"></label>
         <label class="setting-row">史萊姆攻擊 <input type="number" id="setSlimeAttack" min="1" max="99" step="1"></label>
-        <label class="setting-row">史萊姆攻擊間隔 <input type="number" id="setSlimeAttackInterval" min="0.2" max="5" step="0.05"></label>
+        <label class="setting-row">史萊姆攻擊間隔 <input type="number" id="setSlimeAttackInterval" min="0.2" max="5"
+            step="0.05"></label>
         <label class="setting-row">弓手 HP <input type="number" id="setArcherHp" min="1" max="999" step="1"></label>
         <label class="setting-row">弓手攻擊 <input type="number" id="setArcherAttack" min="1" max="99" step="1"></label>
-        <label class="setting-row">弓手攻擊間隔 <input type="number" id="setArcherAttackInterval" min="0.2" max="5" step="0.05"></label>
+        <label class="setting-row">弓手攻擊間隔 <input type="number" id="setArcherAttackInterval" min="0.2" max="5"
+            step="0.05"></label>
         <label class="setting-row">弓手射程 <input type="number" id="setArcherRange" min="1" max="15" step="1"></label>
         <label class="setting-row">BGM 音量 <input type="range" id="setMusicVolume" min="0" max="1" step="0.05"></label>
         <label class="setting-row">音效音量 <input type="range" id="setSfxVolume" min="0" max="1" step="0.05"></label>
@@ -484,10 +500,13 @@
           <label class="setting-row">召喚成本 <input type="number" id="setHeroAllyCost" min="0" step="1"></label>
           <label class="setting-row">HP <input type="number" id="setHeroAllyHp" min="1" step="1"></label>
           <label class="setting-row">攻擊力 <input type="number" id="setHeroAllyAttack" min="0" step="1"></label>
-          <label class="setting-row">移動間隔 <input type="number" id="setHeroAllyMove" min="0.1" max="5" step="0.05"></label>
+          <label class="setting-row">移動間隔 <input type="number" id="setHeroAllyMove" min="0.1" max="5"
+              step="0.05"></label>
           <label class="setting-row">治療量 <input type="number" id="setHeroAllyHealAmount" min="0" step="1"></label>
-          <label class="setting-row">治療範圍 <input type="number" id="setHeroAllyHealRange" min="1" max="10" step="1"></label>
-          <label class="setting-row">治療間隔 <input type="number" id="setHeroAllyHealInterval" min="0.2" max="20" step="0.1"></label>
+          <label class="setting-row">治療範圍 <input type="number" id="setHeroAllyHealRange" min="1" max="10"
+              step="1"></label>
+          <label class="setting-row">治療間隔 <input type="number" id="setHeroAllyHealInterval" min="0.2" max="20"
+              step="0.1"></label>
         </div>
         <div class="hero-card">
           <h3>冒險者祭司</h3>
@@ -495,15 +514,19 @@
           <label class="setting-row">登場敵人數 <input type="number" id="setHeroEnemySpawnAt" min="1" step="1"></label>
           <label class="setting-row">HP <input type="number" id="setHeroEnemyHp" min="1" step="1"></label>
           <label class="setting-row">攻擊力 <input type="number" id="setHeroEnemyAttack" min="0" step="1"></label>
-          <label class="setting-row">移動間隔 <input type="number" id="setHeroEnemyMove" min="0.1" max="5" step="0.05"></label>
+          <label class="setting-row">移動間隔 <input type="number" id="setHeroEnemyMove" min="0.1" max="5"
+              step="0.05"></label>
           <label class="setting-row">治療量 <input type="number" id="setHeroEnemyHealAmount" min="0" step="1"></label>
-          <label class="setting-row">治療範圍 <input type="number" id="setHeroEnemyHealRange" min="1" max="10" step="1"></label>
-          <label class="setting-row">治療間隔 <input type="number" id="setHeroEnemyHealInterval" min="0.2" max="20" step="0.1"></label>
+          <label class="setting-row">治療範圍 <input type="number" id="setHeroEnemyHealRange" min="1" max="10"
+              step="1"></label>
+          <label class="setting-row">治療間隔 <input type="number" id="setHeroEnemyHealInterval" min="0.2" max="20"
+              step="0.1"></label>
         </div>
       </div>
       <div class="dialog-tools">
         <button type="button" id="saveSettingsBtn">儲存目前參數</button>
         <button type="button" id="loadSettingsBtn">載入已儲存參數</button>
+        <button type="button" id="resetSettingsBtn">恢復預設參數</button>
         <button type="button" id="exportSettingsBtn">匯出參數</button>
         <button type="button" id="importSettingsBtn">匯入參數</button>
         <button type="button" id="exportRecordsBtn">匯出對局紀錄</button>
@@ -526,16 +549,16 @@
     const ROWS = 20;
     const TILE = 32;
     const DEFAULT_SETTINGS = {
-      initialMana: 90,
+      initialMana: 150,
       coreHp: 140,
-      enemyCount: 28,
+      enemyCount: 30,
       spawnInterval: 1.25,
-      digCost: 5,
-      digPowerMax: 4,
+      digCost: 4,
+      digPowerMax: 8,
       digPowerCost: 1,
-      digPowerRegenInterval: 8,
+      digPowerRegenInterval: 6,
       digPowerRegenAmount: 1,
-      blockCost: 55,
+      blockCost: 60,
       slimeCost: 25,
       archerCost: 35,
       slimeCooldown: 4,
@@ -544,12 +567,12 @@
       manaRegenInterval: 4,
       manaRegenAmount: 2,
       enemyReward: 3,
-      digEmptyChance: 0.6,
-      digSmallChance: 0.3,
-      digSmallMin: 4,
+      digEmptyChance: 0.45,
+      digSmallChance: 0.35,
+      digSmallMin: 3,
       digSmallMax: 9,
-      digBigMin: 16,
-      digBigMax: 24,
+      digBigMin: 15,
+      digBigMax: 23,
       coreVision: 6,
       enemyAttackInterval: 1,
       stuckSeconds: 8,
@@ -557,37 +580,37 @@
       progressCheckInterval: 2,
       coreMinDistance: 12,
       soldierHp: 35,
-      soldierAttack: 5,
+      soldierAttack: 10,
       soldierMove: 0.5,
-      rogueHp: 24,
+      rogueHp: 20,
       rogueAttack: 4,
-      rogueMove: 0.32,
+      rogueMove: 0.25,
       bruteHp: 70,
-      bruteAttack: 8,
+      bruteAttack: 7,
       bruteMove: 0.75,
       slimeHp: 45,
       slimeAttack: 8,
       slimeAttackInterval: 1,
-      archerHp: 28,
+      archerHp: 22,
       archerAttack: 9,
       archerAttackInterval: 1.25,
       archerRange: 4,
       heroAllyCost: 90,
       heroAllyHp: 150,
       heroAllyAttack: 12,
-      heroAllyMove: 0.7,
+      heroAllyMove: 0.6,
       heroAllyHealAmount: 10,
       heroAllyHealRange: 3,
       heroAllyHealInterval: 4,
       heroEnemySpawnAt: 12,
       heroEnemyHp: 130,
       heroEnemyAttack: 6,
-      heroEnemyMove: 0.62,
+      heroEnemyMove: 0.7,
       heroEnemyHealAmount: 8,
       heroEnemyHealRange: 3,
       heroEnemyHealInterval: 4,
-      musicVolume: 0.18,
-      sfxVolume: 0.55,
+      musicVolume: 0.3,
+      sfxVolume: 0.6,
     };
     const STORAGE_KEYS = {
       settings: "timeAuthority.settings.v1",
@@ -684,6 +707,7 @@
     let enemyIntel;
     let hoverCell;
     let lastTime;
+    let gameSpeed = 1;
     let gameOver;
     let previewPath;
     let digCount;
@@ -716,6 +740,7 @@
       heroBtn: document.getElementById("heroBtn"),
       coreBtn: document.getElementById("coreBtn"),
       startBtn: document.getElementById("startBtn"),
+      speedBtn: document.getElementById("speedBtn"),
       settingsBtn: document.getElementById("settingsBtn"),
       restartBtn: document.getElementById("restartBtn"),
       settingsDialog: document.getElementById("settingsDialog"),
@@ -785,6 +810,7 @@
       setSfxVolume: document.getElementById("setSfxVolume"),
       saveSettingsBtn: document.getElementById("saveSettingsBtn"),
       loadSettingsBtn: document.getElementById("loadSettingsBtn"),
+      resetSettingsBtn: document.getElementById("resetSettingsBtn"),
       exportSettingsBtn: document.getElementById("exportSettingsBtn"),
       importSettingsBtn: document.getElementById("importSettingsBtn"),
       exportRecordsBtn: document.getElementById("exportRecordsBtn"),
@@ -884,6 +910,18 @@
       const names = { dig: "挖掘", block: "封路", slime: "召喚史萊姆", archer: "召喚弓手", hero: "召喚艾爾", core: "移動核心" };
       setMessage(`目前選擇：${names[action]}。點選地圖格子執行。`);
       updateButtons();
+    }
+
+    function toggleGameSpeed() {
+      if (gameSpeed === 1) {
+        gameSpeed = 2;
+      } else if (gameSpeed === 2) {
+        gameSpeed = 3;
+      } else {
+        gameSpeed = 1;
+      }
+
+      ui.speedBtn.textContent = `速度 ${gameSpeed}×`;
     }
 
     function updateButtons() {
@@ -1167,6 +1205,11 @@
       const savedSettings = loadSettingsFromStorage();
       fillSettingsForm(savedSettings);
       setSettingsStatus("已載入儲存參數，按「套用並重開」後生效。");
+    }
+
+    function resetSettingsToDefault() {
+      fillSettingsForm(DEFAULT_SETTINGS);
+      setSettingsStatus("已恢復預設參數，按「套用並重開」後生效。");
     }
 
     function exportCurrentSettings() {
@@ -1747,6 +1790,7 @@
         label: type.label,
         attackTimer: 0,
         moveTimer: 0,
+        blockedTime: 0,
         path: [],
         exploreTarget: null,
         visited: new Set([`${entrance.x},${entrance.y}`]),
@@ -1775,6 +1819,7 @@
         isHero: true,
         attackTimer: 0,
         moveTimer: 0,
+        blockedTime: 0,
         healTimer: settings.heroEnemyHealInterval,
         path: [],
         visited: new Set([`${entrance.x},${entrance.y}`]),
@@ -1785,9 +1830,11 @@
       playHeroArrivalSound();
       setMessage("冒險者祭司加入戰線。敵方部隊開始獲得治療支援。");
     }
-
     function update(dt) {
       if (gameOver) return;
+
+      dt *= gameSpeed;
+
       if (phase === "進攻階段") {
         slimeCooldownRemaining = Math.max(0, slimeCooldownRemaining - dt);
         archerCooldownRemaining = Math.max(0, archerCooldownRemaining - dt);
@@ -2153,21 +2200,49 @@
       if (!enemy.path.length) return;
 
       const next = enemy.path[0];
+
       if (isSame(next, core)) return;
+
       const blockingMonster = monsterAt(next.x, next.y);
       if (blockingMonster) {
+        enemy.blockedTime = 0;
+
         if (enemy.attackTimer <= 0) {
           damageUnit(blockingMonster, enemy.attack, "#ff8f8f");
           enemy.attackTimer = settings.enemyAttackInterval;
         }
-        return;
-      }
-      if (enemyAt(next.x, next.y)) return;
-      if (!canStandOn(next.x, next.y, { allowPosition: { x: enemy.x, y: enemy.y } })) {
-        enemy.path = planEnemyPath(enemy);
+
         return;
       }
 
+      const blockingEnemy = enemyAt(next.x, next.y);
+      if (blockingEnemy) {
+        enemy.blockedTime += enemy.moveInterval;
+
+        if (enemy.blockedTime >= 1.5) {
+          const newPath = findPath(enemy, core, {
+            allowPosition: { x: enemy.x, y: enemy.y },
+          });
+
+          if (newPath && newPath.length > 0) {
+            enemy.path = newPath;
+          } else {
+            enemy.path = planEnemyPath(enemy);
+          }
+
+          enemy.blockedTime = 0;
+        }
+
+        return;
+      }
+
+      if (!canStandOn(next.x, next.y, { allowPosition: { x: enemy.x, y: enemy.y } })) {
+        enemy.path = planEnemyPath(enemy);
+        enemy.blockedTime = 0;
+        return;
+      }
+
+      enemy.blockedTime = 0;
       enemy.x = next.x;
       enemy.y = next.y;
       enemy.visited.add(`${enemy.x},${enemy.y}`);
@@ -2177,14 +2252,30 @@
     function planEnemyPath(enemy) {
       if (enemyIntel.mode === "breakthrough") {
         if (enemyIntel.coreDiscovered) {
-          const pathAroundBlockers = findPath(enemy, core, { allowPosition: { x: enemy.x, y: enemy.y } });
-          if (pathAroundBlockers && pathAroundBlockers.length) return pathAroundBlockers;
+          const pathAroundBlockers = findPath(enemy, core, {
+            allowPosition: { x: enemy.x, y: enemy.y },
+          });
+
+          if (pathAroundBlockers && pathAroundBlockers.length) {
+            return pathAroundBlockers;
+          }
         }
+
         return chooseExploreStep(enemy, true);
       }
 
       if (enemyIntel.coreDiscovered) {
-        return findPath(enemy, core, { ignoreUnits: true }) || [];
+        const pathAvoidingUnits = findPath(enemy, core, {
+          allowPosition: { x: enemy.x, y: enemy.y },
+        });
+
+        if (pathAvoidingUnits && pathAvoidingUnits.length) {
+          return pathAvoidingUnits;
+        }
+
+        return findPath(enemy, core, {
+          ignoreUnits: true,
+        }) || [];
       }
 
       return chooseExploreStep(enemy, false);
@@ -2198,11 +2289,14 @@
       for (const step of neighbors(enemy)) {
         if (!isWalkableType(grid[step.y][step.x])) continue;
         if (!enemyIntel.coreDiscovered && isSame(step, core)) continue;
+
+        const occupied = enemyAt(step.x, step.y);
+        if (occupied) continue;
+
         const key = `${step.x},${step.y}`;
         const known = enemyIntel.knownTiles.has(key);
         const visited = enemy.visited.has(key);
         const blocker = monsterAt(step.x, step.y);
-        const occupied = enemyAt(step.x, step.y);
         const forward = manhattan(entrance, step) - manhattan(entrance, enemy);
         const side = Math.abs(step.y - entrance.y) - Math.abs(enemy.y - entrance.y);
         const reverse = step.x === enemy.x - lastStep.x && step.y === enemy.y - lastStep.y;
@@ -2211,9 +2305,15 @@
         if (!known) score += 22;
         if (!visited) score += 12;
         score += Math.max(-1, Math.min(1, forward)) * 2.2;
-        if (preferSideRoute) score += side * 5 + (visited ? -6 : 0);
-        if (blocker) score += preferSideRoute ? -5 : 8;
-        if (occupied) score -= 16;
+
+        if (preferSideRoute) {
+          score += side * 5 + (visited ? -6 : 0);
+        }
+
+        if (blocker) {
+          score += preferSideRoute ? -5 : 8;
+        }
+
         if (reverse) score -= 9;
 
         if (score > bestScore) {
@@ -2223,7 +2323,12 @@
       }
 
       if (!best) return [];
-      enemy.lastExploreStep = { x: best.x - enemy.x, y: best.y - enemy.y };
+
+      enemy.lastExploreStep = {
+        x: best.x - enemy.x,
+        y: best.y - enemy.y,
+      };
+
       return [best];
     }
 
@@ -2504,6 +2609,7 @@
       button.addEventListener("click", () => selectAction(button.dataset.action));
     });
     ui.startBtn.addEventListener("click", startAttack);
+    ui.speedBtn.addEventListener("click", toggleGameSpeed);
     ui.settingsBtn.addEventListener("click", openSettings);
     ui.applySettingsBtn.addEventListener("click", (event) => {
       event.preventDefault();
@@ -2519,6 +2625,7 @@
     });
     ui.saveSettingsBtn.addEventListener("click", saveCurrentSettingsFromForm);
     ui.loadSettingsBtn.addEventListener("click", loadSavedSettingsIntoForm);
+    ui.resetSettingsBtn.addEventListener("click", resetSettingsToDefault);
     ui.exportSettingsBtn.addEventListener("click", exportCurrentSettings);
     ui.importSettingsBtn.addEventListener("click", () => ui.settingsFileInput.click());
     ui.settingsFileInput.addEventListener("change", () => importSettingsFile(ui.settingsFileInput.files[0]));
@@ -2531,4 +2638,5 @@
     requestAnimationFrame(tick);
   </script>
 </body>
+
 </html>
