@@ -1667,14 +1667,7 @@
     }
 
     function summonSlime(x, y) {
-      if (grid[y][x] !== TILE_TYPE.ROAD) {
-        setMessage("史萊姆只能召喚在普通道路上。");
-        return;
-      }
-      if (unitAt(x, y)) {
-        setMessage("這格已經有單位。");
-        return;
-      }
+      if (!canSummonAt(x, y, "史萊姆")) return;
       if (phase === "進攻階段" && slimeCooldownRemaining > 0) {
         setMessage(`史萊姆召喚冷卻中：${slimeCooldownRemaining.toFixed(1)} 秒。`);
         return;
@@ -1700,14 +1693,7 @@
     }
 
     function summonArcher(x, y) {
-      if (grid[y][x] !== TILE_TYPE.ROAD) {
-        setMessage("弓手只能召喚在普通道路上。");
-        return;
-      }
-      if (unitAt(x, y)) {
-        setMessage("這格已經有單位。");
-        return;
-      }
+      if (!canSummonAt(x, y, "弓手")) return;
       if (phase === "進攻階段" && archerCooldownRemaining > 0) {
         setMessage(`弓手召喚冷卻中：${archerCooldownRemaining.toFixed(1)} 秒。`);
         return;
@@ -1738,14 +1724,7 @@
         setMessage("艾爾本局已經出戰過，不能再次召喚。");
         return;
       }
-      if (grid[y][x] !== TILE_TYPE.ROAD) {
-        setMessage("艾爾只能召喚在普通道路上。");
-        return;
-      }
-      if (unitAt(x, y)) {
-        setMessage("這格已經有單位。");
-        return;
-      }
+      if (!canSummonAt(x, y, "艾爾")) return;
       if (!spend(settings.heroAllyCost)) return;
       alliedHero = {
         x,
@@ -1768,6 +1747,22 @@
       playHeroArrivalSound();
       recomputePaths();
       setMessage("妖狐神使艾爾降臨。她會週期性治療周圍的我方召喚生物。");
+    }
+
+    function canSummonAt(x, y, unitName) {
+      if (grid[y][x] !== TILE_TYPE.ROAD) {
+        setMessage(`${unitName}只能召喚在普通道路上。`);
+        return false;
+      }
+      if (isNearEntrance(x, y, 5)) {
+        setMessage("入口 5 格內不能執行召喚。");
+        return false;
+      }
+      if (unitAt(x, y)) {
+        setMessage("這格已經有單位。");
+        return false;
+      }
+      return true;
     }
 
     function spawnEnemy() {
@@ -2220,12 +2215,12 @@
         enemy.blockedTime += enemy.moveInterval;
 
         if (enemy.blockedTime >= 1.5) {
-          const newPath = findPath(enemy, core, {
-            allowPosition: { x: enemy.x, y: enemy.y },
-          });
+          if (enemyIntel.coreDiscovered) {
+            const newPath = findPath(enemy, core, {
+              allowPosition: { x: enemy.x, y: enemy.y },
+            });
 
-          if (newPath && newPath.length > 0) {
-            enemy.path = newPath;
+            enemy.path = newPath && newPath.length > 0 ? newPath : planEnemyPath(enemy);
           } else {
             enemy.path = planEnemyPath(enemy);
           }
@@ -2426,6 +2421,10 @@
 
     function manhattan(a, b) {
       return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    }
+
+    function isNearEntrance(x, y, range) {
+      return manhattan({ x, y }, entrance) <= range;
     }
 
     function getEnemyNextStep(enemy) {
