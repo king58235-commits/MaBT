@@ -549,11 +549,11 @@
     const ROWS = 20;
     const TILE = 32;
     const DEFAULT_SETTINGS = {
-      initialMana: 150,
+      initialMana: 120,
       coreHp: 150,
       enemyCount: 30,
-      spawnInterval: 2,
-      digCost: 3,
+      spawnInterval: 2.4,
+      digCost: 6,
       digPowerMax: 10,
       digPowerCost: 1,
       digPowerRegenInterval: 4,
@@ -566,13 +566,13 @@
       manaRegenEnabled: true,
       manaRegenInterval: 3,
       manaRegenAmount: 2,
-      enemyReward: 3,
-      digEmptyChance: 0.4,
-      digSmallChance: 0.35,
-      digSmallMin: 4,
-      digSmallMax: 9,
+      enemyReward: 2,
+      digEmptyChance: 0.35,
+      digSmallChance: 0.45,
+      digSmallMin: 5,
+      digSmallMax: 10,
       digBigMin: 16,
-      digBigMax: 25,
+      digBigMax: 28,
       coreVision: 6,
       enemyAttackInterval: 1,
       stuckSeconds: 8,
@@ -657,6 +657,21 @@
       "rogue", "brute", "soldier", "rogue", "soldier",
       "brute", "rogue", "soldier", "brute", "rogue",
     ];
+
+    const ALLY_BLOCK_CAPACITY = {
+      slime: 2,
+      archer: 1,
+      alliedHero: 3,
+    };
+
+    const ENEMY_BLOCK_COST = {
+      soldier: 1,
+      rogue: 1,
+      brute: 2,
+      enemyHeroPriest: 1,
+    };
+
+    const ROGUE_SLIP_CHANCE = 0.35;
 
     const levelRows = [
       "##############################",
@@ -1338,6 +1353,7 @@
         coreDiscovered: false,
         mode: "explore",
         knownTiles: new Set(),
+        deadEndTiles: new Set(),
         progressTimer: 0,
         stuckTimer: 0,
         breakthroughTimer: 0,
@@ -1466,11 +1482,15 @@
     }
 
     function unitAt(x, y) {
-      return enemies.find((e) => e.x === x && e.y === y) || monsterAt(x, y);
+      return enemyAt(x, y) || monsterAt(x, y);
     }
 
     function enemyAt(x, y) {
       return enemies.find((e) => e.x === x && e.y === y);
+    }
+
+    function enemiesAt(x, y) {
+      return enemies.filter((e) => e.x === x && e.y === y);
     }
 
     function slimeAt(x, y) {
@@ -1482,13 +1502,59 @@
     }
 
     function monsterAt(x, y) {
-      return slimeAt(x, y) || archerAt(x, y) || (alliedHero && alliedHero.x === x && alliedHero.y === y ? alliedHero : null);
+      return monstersAt(x, y)[0] || null;
+    }
+
+    function monstersAt(x, y) {
+      const monsters = [
+        ...slimes.filter((s) => s.x === x && s.y === y),
+        ...archers.filter((a) => a.x === x && a.y === y),
+      ];
+      if (alliedHero && alliedHero.x === x && alliedHero.y === y) monsters.push(alliedHero);
+      return monsters;
+    }
+
+    function getAllyBlockCapacity(unit) {
+      if (!unit) return 0;
+      if (slimes.includes(unit)) return ALLY_BLOCK_CAPACITY.slime;
+      if (archers.includes(unit)) return ALLY_BLOCK_CAPACITY.archer;
+      if (unit === alliedHero) return ALLY_BLOCK_CAPACITY.alliedHero;
+      return 0;
+    }
+
+    function getEnemyBlockCost(enemy) {
+      return ENEMY_BLOCK_COST[enemy.type] || 1;
+    }
+
+    function getBlockCapacityAt(x, y) {
+      return monstersAt(x, y).reduce((sum, unit) => sum + getAllyBlockCapacity(unit), 0);
+    }
+
+    function getReservedBlockAt(x, y, ignoredEnemy = null) {
+      return enemies.reduce((sum, enemy) => {
+        if (enemy === ignoredEnemy || !enemy.blockTarget) return sum;
+        if (enemy.blockTarget.x !== x || enemy.blockTarget.y !== y) return sum;
+        return sum + getEnemyBlockCost(enemy);
+      }, 0);
+    }
+
+    function canBlockEnemyAt(enemy, x, y) {
+      return getReservedBlockAt(x, y, enemy) + getEnemyBlockCost(enemy) <= getBlockCapacityAt(x, y);
+    }
+
+    function pickBlockingMonsterAt(x, y) {
+      const candidates = monstersAt(x, y);
+      if (!candidates.length) return null;
+      return candidates.sort((a, b) => getAllyBlockCapacity(b) - getAllyBlockCapacity(a) || a.hp - b.hp)[0];
     }
 
     function canStandOn(x, y, options = {}) {
       if (!isInside(x, y)) return false;
       if (!isWalkableType(grid[y][x])) return false;
-      if (!options.ignoreUnits && unitAt(x, y) && !isSame({ x, y }, options.allowPosition)) return false;
+      if (isSame({ x, y }, options.allowPosition)) return true;
+      if (options.ignoreUnits) return true;
+      if (!options.ignoreEnemies && enemyAt(x, y)) return false;
+      if (!options.ignoreMonsters && monsterAt(x, y)) return false;
       return true;
     }
 
@@ -1530,6 +1596,10 @@
         enemy.path = enemyIntel ? planEnemyPath(enemy) : [];
       }
       previewPath = findPath(entrance, core, { ignoreUnits: true });
+    }
+
+    function forgetDeadEnds() {
+      if (enemyIntel?.deadEndTiles) enemyIntel.deadEndTiles.clear();
     }
 
     function spend(amount) {
@@ -1586,6 +1656,7 @@
       if (!spend(settings.digCost)) return;
       digPower -= settings.digPowerCost;
       grid[y][x] = TILE_TYPE.ROAD;
+      forgetDeadEnds();
       const foundMana = rollDigMana();
       if (foundMana > 0) {
         mana += foundMana;
@@ -1619,6 +1690,7 @@
       }
       if (!spend(settings.blockCost)) return;
       grid[y][x] = TILE_TYPE.WALL;
+      forgetDeadEnds();
       blockCount++;
       recomputePaths();
       setMessage("道路已封閉，入侵者將被迫改道。");
@@ -1758,7 +1830,7 @@
         setMessage("入口 5 格內不能執行召喚。");
         return false;
       }
-      if (unitAt(x, y)) {
+      if (enemyAt(x, y)) {
         setMessage("這格已經有單位。");
         return false;
       }
@@ -1767,7 +1839,7 @@
 
     function spawnEnemy() {
       if (spawnedCount >= settings.enemyCount) return;
-      if (unitAt(entrance.x, entrance.y)) return;
+      if (monsterAt(entrance.x, entrance.y)) return;
 
       const typeId = ENEMY_SEQUENCE[spawnedCount] || "soldier";
       const type = ENEMY_TYPES[typeId];
@@ -1797,7 +1869,7 @@
     }
 
     function spawnEnemyHero() {
-      if (enemyHeroSpawned || unitAt(entrance.x, entrance.y)) return;
+      if (enemyHeroSpawned || monsterAt(entrance.x, entrance.y)) return;
       enemyHeroSpawned = true;
       const priest = {
         x: entrance.x,
@@ -1983,8 +2055,7 @@
       return [monster, ...neighbors(monster)].filter((pos) => {
         if (grid[pos.y][pos.x] !== TILE_TYPE.ROAD) return false;
         if (manhattan(pos, { x: monster.homeX, y: monster.homeY }) > monster.roamRadius) return false;
-        const occupant = unitAt(pos.x, pos.y);
-        return !occupant || occupant === monster;
+        return !enemyAt(pos.x, pos.y);
       });
     }
 
@@ -2198,46 +2269,38 @@
 
       if (isSame(next, core)) return;
 
+      let passedBlocker = false;
       const blockingMonster = monsterAt(next.x, next.y);
       if (blockingMonster) {
-        enemy.blockedTime = 0;
+        const rogueSlipsThrough = enemy.type === "rogue" && Math.random() < ROGUE_SLIP_CHANCE;
+        if (!rogueSlipsThrough && canBlockEnemyAt(enemy, next.x, next.y)) {
+          enemy.blockedTime = 0;
+          enemy.blockTarget = { x: next.x, y: next.y };
 
-        if (enemy.attackTimer <= 0) {
-          damageUnit(blockingMonster, enemy.attack, "#ff8f8f");
-          enemy.attackTimer = settings.enemyAttackInterval;
-        }
-
-        return;
-      }
-
-      const blockingEnemy = enemyAt(next.x, next.y);
-      if (blockingEnemy) {
-        enemy.blockedTime += enemy.moveInterval;
-
-        if (enemy.blockedTime >= 1.5) {
-          if (enemyIntel.coreDiscovered) {
-            const newPath = findPath(enemy, core, {
-              allowPosition: { x: enemy.x, y: enemy.y },
-            });
-
-            enemy.path = newPath && newPath.length > 0 ? newPath : planEnemyPath(enemy);
-          } else {
-            enemy.path = planEnemyPath(enemy);
+          if (enemy.attackTimer <= 0) {
+            damageUnit(pickBlockingMonsterAt(next.x, next.y) || blockingMonster, enemy.attack, "#ff8f8f");
+            enemy.attackTimer = settings.enemyAttackInterval;
           }
 
-          enemy.blockedTime = 0;
+          return;
         }
 
-        return;
+        enemy.blockTarget = null;
+        passedBlocker = true;
       }
 
-      if (!canStandOn(next.x, next.y, { allowPosition: { x: enemy.x, y: enemy.y } })) {
+      if (!passedBlocker && !canStandOn(next.x, next.y, {
+        allowPosition: { x: enemy.x, y: enemy.y },
+        ignoreEnemies: true,
+      })) {
         enemy.path = planEnemyPath(enemy);
         enemy.blockedTime = 0;
+        enemy.blockTarget = null;
         return;
       }
 
       enemy.blockedTime = 0;
+      enemy.blockTarget = null;
       enemy.x = next.x;
       enemy.y = next.y;
       enemy.visited.add(`${enemy.x},${enemy.y}`);
@@ -2249,6 +2312,8 @@
         if (enemyIntel.coreDiscovered) {
           const pathAroundBlockers = findPath(enemy, core, {
             allowPosition: { x: enemy.x, y: enemy.y },
+            ignoreEnemies: true,
+            ignoreMonsters: true,
           });
 
           if (pathAroundBlockers && pathAroundBlockers.length) {
@@ -2256,16 +2321,18 @@
           }
         }
 
-        return chooseExploreStep(enemy, true);
+        return findExplorePath(enemy, true) || chooseExploreStep(enemy, true);
       }
 
       if (enemyIntel.coreDiscovered) {
-        const pathAvoidingUnits = findPath(enemy, core, {
+        const pathThroughBlockers = findPath(enemy, core, {
           allowPosition: { x: enemy.x, y: enemy.y },
+          ignoreEnemies: true,
+          ignoreMonsters: true,
         });
 
-        if (pathAvoidingUnits && pathAvoidingUnits.length) {
-          return pathAvoidingUnits;
+        if (pathThroughBlockers && pathThroughBlockers.length) {
+          return pathThroughBlockers;
         }
 
         return findPath(enemy, core, {
@@ -2273,13 +2340,102 @@
         }) || [];
       }
 
-      return chooseExploreStep(enemy, false);
+      return findExplorePath(enemy, false) || chooseExploreStep(enemy, false);
+    }
+
+    function findExplorePath(enemy, preferSideRoute) {
+      const startKey = `${enemy.x},${enemy.y}`;
+      const queue = [{ x: enemy.x, y: enemy.y }];
+      const visited = new Set([startKey]);
+      const cameFrom = new Map();
+      let best = null;
+      let bestScore = -Infinity;
+
+      while (queue.length) {
+        const current = queue.shift();
+        const currentKey = `${current.x},${current.y}`;
+        if (currentKey !== startKey) {
+          const score = scoreExploreFrontier(enemy, current, preferSideRoute);
+          if (score > bestScore) {
+            bestScore = score;
+            best = current;
+          }
+          if (score >= 30) break;
+        }
+
+        for (const next of neighbors(current)) {
+          const key = `${next.x},${next.y}`;
+          if (visited.has(key)) continue;
+          if (!isWalkableType(grid[next.y][next.x])) continue;
+          if (!enemyIntel.coreDiscovered && isSame(next, core)) continue;
+          if (enemyIntel.deadEndTiles.has(key)) continue;
+          visited.add(key);
+          cameFrom.set(key, currentKey);
+          queue.push(next);
+        }
+      }
+
+      if (!best || bestScore < 12) {
+        enemyIntel.deadEndTiles.add(startKey);
+        return null;
+      }
+
+      const path = [];
+      let key = `${best.x},${best.y}`;
+      while (cameFrom.has(key)) {
+        const [x, y] = key.split(",").map(Number);
+        path.push({ x, y });
+        key = cameFrom.get(key);
+      }
+      path.reverse();
+      return path;
+    }
+
+    function scoreExploreFrontier(enemy, pos, preferSideRoute) {
+      const key = `${pos.x},${pos.y}`;
+      if (enemyIntel.deadEndTiles.has(key)) return -Infinity;
+
+      let unknownNeighbors = 0;
+      for (const step of neighbors(pos)) {
+        const stepKey = `${step.x},${step.y}`;
+        if (isWalkableType(grid[step.y][step.x]) && !enemyIntel.knownTiles.has(stepKey)) {
+          unknownNeighbors++;
+        }
+      }
+
+      const known = enemyIntel.knownTiles.has(key);
+      const visitedByThisEnemy = enemy.visited.has(key);
+      const distanceFromEnemy = manhattan(enemy, pos);
+      const forward = manhattan(entrance, pos) - manhattan(entrance, enemy);
+      const side = Math.abs(pos.y - entrance.y) - Math.abs(enemy.y - entrance.y);
+      let score = 0;
+
+      if (!known) score += 35;
+      score += unknownNeighbors * 14;
+      if (!visitedByThisEnemy) score += 10;
+      score += Math.max(-2, Math.min(3, forward)) * 2;
+      if (preferSideRoute) score += side * 3;
+      score -= distanceFromEnemy * 1.6;
+
+      return score;
     }
 
     function chooseExploreStep(enemy, preferSideRoute) {
       let best = null;
       let bestScore = -Infinity;
       const lastStep = enemy.lastExploreStep || { x: 0, y: 0 };
+      const currentKey = `${enemy.x},${enemy.y}`;
+      const freshExits = neighbors(enemy).filter((step) => {
+        if (!isWalkableType(grid[step.y][step.x])) return false;
+        if (!enemyIntel.coreDiscovered && isSame(step, core)) return false;
+        if (enemyAt(step.x, step.y)) return false;
+        const key = `${step.x},${step.y}`;
+        return !enemyIntel.knownTiles.has(key) || !enemy.visited.has(key);
+      });
+
+      if (!freshExits.length && enemy.visited.size > 3) {
+        enemyIntel.deadEndTiles.add(currentKey);
+      }
 
       for (const step of neighbors(enemy)) {
         if (!isWalkableType(grid[step.y][step.x])) continue;
@@ -2291,6 +2447,7 @@
         const key = `${step.x},${step.y}`;
         const known = enemyIntel.knownTiles.has(key);
         const visited = enemy.visited.has(key);
+        const deadEnd = enemyIntel.deadEndTiles.has(key);
         const blocker = monsterAt(step.x, step.y);
         const forward = manhattan(entrance, step) - manhattan(entrance, enemy);
         const side = Math.abs(step.y - entrance.y) - Math.abs(enemy.y - entrance.y);
@@ -2305,11 +2462,13 @@
           score += side * 5 + (visited ? -6 : 0);
         }
 
+        if (deadEnd) score -= preferSideRoute ? 18 : 28;
+
         if (blocker) {
-          score += preferSideRoute ? -5 : 8;
+          score += preferSideRoute ? -5 : 3;
         }
 
-        if (reverse) score -= 9;
+        if (reverse && freshExits.length) score -= 9;
 
         if (score > bestScore) {
           bestScore = score;
@@ -2323,6 +2482,15 @@
         x: best.x - enemy.x,
         y: best.y - enemy.y,
       };
+
+      if (!freshExits.length && enemy.visited.has(`${best.x},${best.y}`)) {
+        enemyIntel.deadEndTiles.add(currentKey);
+        for (const step of neighbors(enemy)) {
+          if (isWalkableType(grid[step.y][step.x]) && enemy.visited.has(`${step.x},${step.y}`)) {
+            enemyIntel.deadEndTiles.add(`${step.x},${step.y}`);
+          }
+        }
+      }
 
       return [best];
     }
@@ -2521,8 +2689,16 @@
     }
 
     function drawUnit(unit, color, label, size = 16, outline = null) {
-      const cx = unit.x * TILE + TILE / 2;
-      const cy = unit.y * TILE + TILE / 2;
+      let cx = unit.x * TILE + TILE / 2;
+      let cy = unit.y * TILE + TILE / 2;
+      const stack = [...monstersAt(unit.x, unit.y), ...enemiesAt(unit.x, unit.y)];
+      if (stack.length > 1) {
+        const index = Math.max(0, stack.indexOf(unit));
+        const angle = (Math.PI * 2 * index) / stack.length - Math.PI / 2;
+        const radius = Math.min(9, 3 + stack.length * 1.5);
+        cx += Math.cos(angle) * radius;
+        cy += Math.sin(angle) * radius;
+      }
       if (outline) {
         ctx.strokeStyle = outline;
         ctx.lineWidth = 3;
