@@ -549,14 +549,14 @@
     const ROWS = 20;
     const TILE = 32;
     const DEFAULT_SETTINGS = {
-      initialMana: 120,
+      initialMana: 180,
       coreHp: 150,
-      enemyCount: 30,
-      spawnInterval: 2.4,
-      digCost: 6,
+      enemyCount: 25,
+      spawnInterval: 3,
+      digCost: 3,
       digPowerMax: 10,
       digPowerCost: 1,
-      digPowerRegenInterval: 4,
+      digPowerRegenInterval: 3,
       digPowerRegenAmount: 1,
       blockCost: 60,
       slimeCost: 25,
@@ -565,10 +565,10 @@
       archerCooldown: 12,
       manaRegenEnabled: true,
       manaRegenInterval: 3,
-      manaRegenAmount: 2,
-      enemyReward: 2,
+      manaRegenAmount: 4,
+      enemyReward: 4,
       digEmptyChance: 0.35,
-      digSmallChance: 0.45,
+      digSmallChance: 0.35,
       digSmallMin: 5,
       digSmallMax: 10,
       digBigMin: 16,
@@ -580,13 +580,13 @@
       progressCheckInterval: 2,
       coreMinDistance: 12,
       soldierHp: 35,
-      soldierAttack: 8,
+      soldierAttack: 7,
       soldierMove: 0.5,
       rogueHp: 15,
       rogueAttack: 4,
       rogueMove: 0.25,
       bruteHp: 60,
-      bruteAttack: 7,
+      bruteAttack: 6,
       bruteMove: 0.75,
       slimeHp: 45,
       slimeAttack: 8,
@@ -600,14 +600,14 @@
       heroAllyAttack: 12,
       heroAllyMove: 0.6,
       heroAllyHealAmount: 10,
-      heroAllyHealRange: 3,
+      heroAllyHealRange: 6,
       heroAllyHealInterval: 4,
-      heroEnemySpawnAt: 12,
+      heroEnemySpawnAt: 13,
       heroEnemyHp: 130,
       heroEnemyAttack: 6,
       heroEnemyMove: 0.7,
       heroEnemyHealAmount: 8,
-      heroEnemyHealRange: 3,
+      heroEnemyHealRange: 4,
       heroEnemyHealInterval: 4,
       musicVolume: 0.3,
       sfxVolume: 0.6,
@@ -672,11 +672,12 @@
     };
 
     const ROGUE_SLIP_CHANCE = 0.35;
+    const ROGUE_SLIP_COOLDOWN = 10;
 
     const levelRows = [
       "##############################",
       "#S.....#........#............#",
-      "#......#........#............#",
+      "#......#.....................#",
       "#..##..#..####..#..######..###",
       "#..##.....#.....#.......#....#",
       "#..######.#.###########.#.##.#",
@@ -1830,6 +1831,10 @@
         setMessage("入口 5 格內不能執行召喚。");
         return false;
       }
+      if (monsterAt(x, y)) {
+        setMessage("這格已經有我方單位。");
+        return false;
+      }
       if (enemyAt(x, y)) {
         setMessage("這格已經有單位。");
         return false;
@@ -1857,6 +1862,7 @@
         label: type.label,
         attackTimer: 0,
         moveTimer: 0,
+        slipCooldown: 0,
         blockedTime: 0,
         path: [],
         exploreTarget: null,
@@ -1886,6 +1892,7 @@
         isHero: true,
         attackTimer: 0,
         moveTimer: 0,
+        slipCooldown: 0,
         blockedTime: 0,
         healTimer: settings.heroEnemyHealInterval,
         path: [],
@@ -2187,6 +2194,7 @@
       for (const enemy of enemies) {
         enemy.attackTimer -= dt;
         enemy.moveTimer -= dt;
+        enemy.slipCooldown = Math.max(0, (enemy.slipCooldown || 0) - dt);
 
         enemy.flash = Math.max(0, (enemy.flash || 0) - dt);
         const nextToCore = neighbors(enemy).some((p) => isSame(p, core));
@@ -2272,7 +2280,11 @@
       let passedBlocker = false;
       const blockingMonster = monsterAt(next.x, next.y);
       if (blockingMonster) {
-        const rogueSlipsThrough = enemy.type === "rogue" && Math.random() < ROGUE_SLIP_CHANCE;
+        const canTrySlip = enemy.type === "rogue" && (enemy.slipCooldown || 0) <= 0;
+        const rogueSlipsThrough = canTrySlip && Math.random() < ROGUE_SLIP_CHANCE;
+        if (canTrySlip && !rogueSlipsThrough) {
+          enemy.slipCooldown = ROGUE_SLIP_COOLDOWN;
+        }
         if (!rogueSlipsThrough && canBlockEnemyAt(enemy, next.x, next.y)) {
           enemy.blockedTime = 0;
           enemy.blockTarget = { x: next.x, y: next.y };
