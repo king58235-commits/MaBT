@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
 
 <head>
@@ -84,18 +84,19 @@
     }
 
     .canvas-wrap {
-      width: 100%;
-      max-width: 960px;
+      width: max-content;
+      max-width: none;
       border: 1px solid var(--line);
       background: #1b191d;
       border-radius: 8px;
       padding: 10px;
+      overflow: visible;
     }
 
     canvas {
       display: block;
-      width: 100%;
-      aspect-ratio: 3 / 2;
+      width: 1600px;
+      height: 1120px;
       image-rendering: pixelated;
       background: #0f0e11;
       border-radius: 4px;
@@ -136,11 +137,31 @@
 
     .stat {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
       padding: 8px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--muted);
+    }
+
+    .stat .asset-icon {
+      width: 20px;
+      height: 20px;
+      image-rendering: pixelated;
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 2000px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      aside {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        align-items: start;
+      }
     }
 
     .stat:last-child {
@@ -358,30 +379,30 @@
       <header>
         <div>
           <h1>時之權能：魔界之戰</h1>
-          <div class="subtitle">HTML Prototype - 地下城防衛測試版</div>
+          <div class="subtitle">HTML Prototype - 召喚魔物防守地牢核心</div>
         </div>
         <div class="badge" id="phaseBadge">準備階段</div>
       </header>
 
       <div class="canvas-wrap">
-        <canvas id="game" width="960" height="640" aria-label="地下城棋盤"></canvas>
+        <canvas id="game" width="1600" height="1120" aria-label="地牢戰場"></canvas>
       </div>
 
-      <div class="message" id="message">先用初始魔素配置史萊姆與地形，準備好後按下開始進攻。</div>
+      <div class="message" id="message">準備階段：配置防線後開始戰鬥。</div>
       <div id="debugState" hidden></div>
     </section>
 
     <aside>
       <section class="panel">
-        <h2>戰況</h2>
+        <h2>狀態</h2>
         <div class="stats">
           <div class="stat"><span>魔素</span><strong id="manaText">90</strong></div>
           <div class="stat"><span>挖掘力</span><strong id="digPowerText">4 / 4</strong></div>
           <div class="stat"><span>核心 HP</span><strong id="coreText">140 / 140</strong></div>
           <div class="hpbar"><span id="coreBar"></span></div>
-          <div class="stat"><span>敵人生成</span><strong id="spawnText">0 / 28</strong></div>
+          <div class="stat"><span>敵人出現</span><strong id="spawnText">0 / 28</strong></div>
           <div class="stat"><span>場上敵人</span><strong id="enemyText">0</strong></div>
-          <div class="stat"><span>擊殺數</span><strong id="killText">0</strong></div>
+          <div class="stat"><span>擊破數</span><strong id="killText">0</strong></div>
         </div>
       </section>
 
@@ -391,11 +412,12 @@
           <button id="digBtn" data-action="dig">挖掘 15</button>
           <button id="blockBtn" data-action="block">封路 20</button>
           <button id="slimeBtn" data-action="slime">召喚史萊姆 25</button>
-          <button id="archerBtn" data-action="archer">召喚弓手 35</button>
-          <button id="heroBtn" data-action="hero">召喚艾爾 90</button>
+          <button id="archerBtn" data-action="archer">召喚弓箭手 35</button>
+          <button id="poisonBogBtn" data-action="poisonBog">召喚毒沼 55</button>
+          <button id="heroBtn" data-action="hero">召喚妖狐神使艾爾 90</button>
           <button id="coreBtn" data-action="core">移動核心</button>
-          <button class="primary" id="startBtn">開始進攻</button>
-          <button id="speedBtn">速度 1×</button>
+          <button class="primary" id="startBtn">開始戰鬥</button>
+          <button id="speedBtn">速度 1x</button>
           <button id="settingsBtn">設定</button>
           <button class="danger" id="restartBtn">重新開始</button>
         </div>
@@ -410,18 +432,18 @@
           <div class="legend-item"><span class="swatch" style="background: var(--red)"></span>核心</div>
           <div class="legend-item"><span class="swatch" style="background: var(--blue)"></span>敵人</div>
           <div class="legend-item"><span class="swatch" style="background: var(--purple)"></span>史萊姆</div>
-          <div class="legend-item"><span class="swatch" style="background: #d7b45a"></span>弓手</div>
+          <div class="legend-item"><span class="swatch" style="background: #d7b45a"></span>弓箭手</div>
           <div class="legend-item"><span class="swatch" style="background: #ff7ad9"></span>我方英雄</div>
           <div class="legend-item"><span class="swatch" style="background: #fff0a8"></span>敵方英雄</div>
         </div>
       </section>
 
       <section class="panel">
-        <h2>測試重點</h2>
+        <h2>原型重點</h2>
         <ul class="notes">
-          <li>史萊姆與弓手能否形成前排/後排配置。</li>
-          <li>擊殺回收魔素後是否想繼續補強。</li>
-          <li>不同敵人是否會逼玩家調整防線。</li>
+          <li>用史萊姆、弓箭手、毒沼與英雄防守核心。</li>
+          <li>挖牆可以取得魔素，但會增加地牢破口。</li>
+          <li>敵人會探索地圖，共享核心情報並嘗試突破防線。</li>
         </ul>
       </section>
     </aside>
@@ -434,69 +456,75 @@
         <label class="setting-row">初始魔素 <input type="number" id="setInitialMana" min="0" max="999" step="5"></label>
         <label class="setting-row">核心 HP <input type="number" id="setCoreHp" min="10" max="999" step="10"></label>
         <label class="setting-row">敵人總數 <input type="number" id="setEnemyCount" min="1" max="60" step="1"></label>
-        <label class="setting-row">生成間隔 <input type="number" id="setSpawnInterval" min="0.3" max="5"
+        <label class="setting-row">出現間隔 <input type="number" id="setSpawnInterval" min="0.3" max="5"
             step="0.05"></label>
         <label class="setting-row">挖掘成本 <input type="number" id="setDigCost" min="0" max="200" step="1"></label>
-        <label class="setting-row">最大挖掘力 <input type="number" id="setDigPowerMax" min="0" max="99" step="1"></label>
+        <label class="setting-row">挖掘力上限 <input type="number" id="setDigPowerMax" min="0" max="99" step="1"></label>
         <label class="setting-row">挖掘力消耗 <input type="number" id="setDigPowerCost" min="0" max="99" step="1"></label>
-        <label class="setting-row">挖掘力回復間隔 <input type="number" id="setDigPowerRegenInterval" min="0.1" max="120"
+        <label class="setting-row">挖掘力恢復間隔 <input type="number" id="setDigPowerRegenInterval" min="0.1" max="120"
             step="0.1"></label>
-        <label class="setting-row">挖掘力回復量 <input type="number" id="setDigPowerRegenAmount" min="0" max="99"
+        <label class="setting-row">挖掘力恢復量 <input type="number" id="setDigPowerRegenAmount" min="0" max="99"
             step="1"></label>
         <label class="setting-row">封路成本 <input type="number" id="setBlockCost" min="0" max="200" step="1"></label>
         <label class="setting-row">史萊姆成本 <input type="number" id="setSlimeCost" min="0" max="200" step="1"></label>
-        <label class="setting-row">弓手成本 <input type="number" id="setArcherCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">弓箭手成本 <input type="number" id="setArcherCost" min="0" max="200" step="1"></label>
+        <label class="setting-row">毒沼成本 <input type="number" id="setPoisonBogCost" min="0" max="300" step="1"></label>
         <label class="setting-row">史萊姆冷卻 <input type="number" id="setSlimeCooldown" min="0" max="30" step="0.5"></label>
-        <label class="setting-row">弓手冷卻 <input type="number" id="setArcherCooldown" min="0" max="30" step="0.5"></label>
+        <label class="setting-row">弓箭手冷卻 <input type="number" id="setArcherCooldown" min="0" max="30" step="0.5"></label>
+        <label class="setting-row">毒沼冷卻 <input type="number" id="setPoisonBogCooldown" min="0" max="60" step="0.5"></label>
         <label class="setting-row">魔素自然回復 <input type="checkbox" id="setManaRegenEnabled"></label>
-        <label class="setting-row">自然回復間隔 <input type="number" id="setManaRegenInterval" min="0.1" max="60"
+        <label class="setting-row">魔素回復間隔 <input type="number" id="setManaRegenInterval" min="0.1" max="60"
             step="0.1"></label>
-        <label class="setting-row">自然回復量 <input type="number" id="setManaRegenAmount" min="0" step="1"></label>
-        <label class="setting-row">敵人掉落 <input type="number" id="setEnemyReward" min="0" max="50" step="1"></label>
-        <label class="setting-row">挖牆空包率 <input type="number" id="setDigEmptyChance" min="0" max="1"
+        <label class="setting-row">魔素回復量 <input type="number" id="setManaRegenAmount" min="0" step="1"></label>
+        <label class="setting-row">敵人獎勵 <input type="number" id="setEnemyReward" min="0" max="50" step="1"></label>
+        <label class="setting-row">挖掘空手機率 <input type="number" id="setDigEmptyChance" min="0" max="1"
             step="0.05"></label>
-        <label class="setting-row">挖牆小礦率 <input type="number" id="setDigSmallChance" min="0" max="1"
+        <label class="setting-row">挖到少量機率 <input type="number" id="setDigSmallChance" min="0" max="1"
             step="0.05"></label>
-        <label class="setting-row">小礦最小值 <input type="number" id="setDigSmallMin" min="0" max="100" step="1"></label>
-        <label class="setting-row">小礦最大值 <input type="number" id="setDigSmallMax" min="0" max="100" step="1"></label>
-        <label class="setting-row">大礦最小值 <input type="number" id="setDigBigMin" min="0" max="200" step="1"></label>
-        <label class="setting-row">大礦最大值 <input type="number" id="setDigBigMax" min="0" max="200" step="1"></label>
+        <label class="setting-row">少量最小值 <input type="number" id="setDigSmallMin" min="0" max="100" step="1"></label>
+        <label class="setting-row">少量最大值 <input type="number" id="setDigSmallMax" min="0" max="100" step="1"></label>
+        <label class="setting-row">大量最小值 <input type="number" id="setDigBigMin" min="0" max="200" step="1"></label>
+        <label class="setting-row">大量最大值 <input type="number" id="setDigBigMax" min="0" max="200" step="1"></label>
         <label class="setting-row">核心視野 <input type="number" id="setCoreVision" min="1" max="20" step="1"></label>
         <label class="setting-row">敵人攻擊間隔 <input type="number" id="setEnemyAttackInterval" min="0.2" max="5"
             step="0.05"></label>
-        <label class="setting-row">停滯秒數 <input type="number" id="setStuckSeconds" min="1" max="30" step="0.5"></label>
-        <label class="setting-row">突破秒數 <input type="number" id="setBreakthroughSeconds" min="1" max="30"
+        <label class="setting-row">受阻判定秒數 <input type="number" id="setStuckSeconds" min="1" max="30" step="0.5"></label>
+        <label class="setting-row">突破模式秒數 <input type="number" id="setBreakthroughSeconds" min="1" max="30"
             step="0.5"></label>
-        <label class="setting-row">戰線檢查間隔 <input type="number" id="setProgressCheckInterval" min="0.5" max="10"
+        <label class="setting-row">進度檢查間隔 <input type="number" id="setProgressCheckInterval" min="0.5" max="10"
             step="0.5"></label>
         <label class="setting-row">核心最短距離 <input type="number" id="setCoreMinDistance" min="1" max="60"
             step="1"></label>
-        <label class="setting-row">劍士 HP <input type="number" id="setSoldierHp" min="1" max="999" step="1"></label>
-        <label class="setting-row">劍士攻擊 <input type="number" id="setSoldierAttack" min="1" max="99" step="1"></label>
-        <label class="setting-row">劍士移動間隔 <input type="number" id="setSoldierMove" min="0.1" max="5"
+        <label class="setting-row">士兵 HP <input type="number" id="setSoldierHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">士兵攻擊 <input type="number" id="setSoldierAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">士兵移動間隔 <input type="number" id="setSoldierMove" min="0.1" max="5"
             step="0.05"></label>
         <label class="setting-row">盜賊 HP <input type="number" id="setRogueHp" min="1" max="999" step="1"></label>
         <label class="setting-row">盜賊攻擊 <input type="number" id="setRogueAttack" min="1" max="99" step="1"></label>
         <label class="setting-row">盜賊移動間隔 <input type="number" id="setRogueMove" min="0.1" max="5" step="0.05"></label>
-        <label class="setting-row">重甲 HP <input type="number" id="setBruteHp" min="1" max="999" step="1"></label>
-        <label class="setting-row">重甲攻擊 <input type="number" id="setBruteAttack" min="1" max="99" step="1"></label>
-        <label class="setting-row">重甲移動間隔 <input type="number" id="setBruteMove" min="0.1" max="5" step="0.05"></label>
+        <label class="setting-row">重戰士 HP <input type="number" id="setBruteHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">重戰士攻擊 <input type="number" id="setBruteAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">重戰士移動間隔 <input type="number" id="setBruteMove" min="0.1" max="5" step="0.05"></label>
         <label class="setting-row">史萊姆 HP <input type="number" id="setSlimeHp" min="1" max="999" step="1"></label>
         <label class="setting-row">史萊姆攻擊 <input type="number" id="setSlimeAttack" min="1" max="99" step="1"></label>
         <label class="setting-row">史萊姆攻擊間隔 <input type="number" id="setSlimeAttackInterval" min="0.2" max="5"
             step="0.05"></label>
-        <label class="setting-row">弓手 HP <input type="number" id="setArcherHp" min="1" max="999" step="1"></label>
-        <label class="setting-row">弓手攻擊 <input type="number" id="setArcherAttack" min="1" max="99" step="1"></label>
-        <label class="setting-row">弓手攻擊間隔 <input type="number" id="setArcherAttackInterval" min="0.2" max="5"
+        <label class="setting-row">弓箭手 HP <input type="number" id="setArcherHp" min="1" max="999" step="1"></label>
+        <label class="setting-row">弓箭手攻擊 <input type="number" id="setArcherAttack" min="1" max="99" step="1"></label>
+        <label class="setting-row">弓箭手攻擊間隔 <input type="number" id="setArcherAttackInterval" min="0.2" max="5"
             step="0.05"></label>
-        <label class="setting-row">弓手射程 <input type="number" id="setArcherRange" min="1" max="15" step="1"></label>
+        <label class="setting-row">弓箭手射程 <input type="number" id="setArcherRange" min="1" max="15" step="1"></label>
+        <label class="setting-row">毒沼範圍 <input type="number" id="setPoisonBogRange" min="1" max="10" step="1"></label>
+        <label class="setting-row">毒沼傷害 <input type="number" id="setPoisonBogDamage" min="0" max="99" step="1"></label>
+        <label class="setting-row">毒沼觸發間隔 <input type="number" id="setPoisonBogTickInterval" min="0.2" max="10" step="0.1"></label>
+        <label class="setting-row">毒沼緩速倍率 <input type="number" id="setPoisonBogSlowMultiplier" min="1" max="5" step="0.1"></label>
         <label class="setting-row">BGM 音量 <input type="range" id="setMusicVolume" min="0" max="1" step="0.05"></label>
         <label class="setting-row">音效音量 <input type="range" id="setSfxVolume" min="0" max="1" step="0.05"></label>
       </div>
       <div class="hero-settings">
         <div class="hero-card">
           <h3>妖狐神使 艾爾</h3>
-          <p>侍奉古老妖狐神的神使，以狐火替魔界眷屬縫合傷口。她不是守住整座地牢的答案，但能讓快要崩潰的防線重新站起來。</p>
+          <p>侍奉古老狐火的神使，會以靈火療癒周圍我方單位，是地牢防線的王牌。</p>
           <label class="setting-row">召喚成本 <input type="number" id="setHeroAllyCost" min="0" step="1"></label>
           <label class="setting-row">HP <input type="number" id="setHeroAllyHp" min="1" step="1"></label>
           <label class="setting-row">攻擊力 <input type="number" id="setHeroAllyAttack" min="0" step="1"></label>
@@ -510,7 +538,7 @@
         </div>
         <div class="hero-card">
           <h3>冒險者祭司</h3>
-          <p>跟隨遠征隊深入魔界的白袍祭司。只要他仍站在戰線中央，冒險者就會一次又一次從瀕死邊緣被拉回來。</p>
+          <p>追隨討伐隊而來的祭司，會替敵方單位恢復生命，使戰線更難被壓制。</p>
           <label class="setting-row">登場敵人數 <input type="number" id="setHeroEnemySpawnAt" min="1" step="1"></label>
           <label class="setting-row">HP <input type="number" id="setHeroEnemyHp" min="1" step="1"></label>
           <label class="setting-row">攻擊力 <input type="number" id="setHeroEnemyAttack" min="0" step="1"></label>
@@ -530,7 +558,7 @@
         <button type="button" id="exportSettingsBtn">匯出參數</button>
         <button type="button" id="importSettingsBtn">匯入參數</button>
         <button type="button" id="exportRecordsBtn">匯出對局紀錄</button>
-        <button type="button" id="clearRecordsBtn">清空對局紀錄</button>
+        <button type="button" id="clearRecordsBtn">清除對局紀錄</button>
       </div>
       <input type="file" id="settingsFileInput" accept="application/json,.json" hidden>
       <div class="dialog-status" id="settingsStatus" aria-live="polite"></div>
@@ -544,29 +572,34 @@
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
 
     const COLS = 30;
     const ROWS = 20;
-    const TILE = 32;
+    const TILE = 50;
+    const BOARD_OFFSET_X = Math.floor((canvas.width - COLS * TILE) / 2);
+    const BOARD_OFFSET_Y = 80;
     const DEFAULT_SETTINGS = {
-      initialMana: 180,
+      initialMana: 300,
       coreHp: 150,
-      enemyCount: 25,
-      spawnInterval: 3,
+      enemyCount: 40,
+      spawnInterval: 2.2,
       digCost: 3,
       digPowerMax: 10,
       digPowerCost: 1,
       digPowerRegenInterval: 3,
       digPowerRegenAmount: 1,
-      blockCost: 60,
+      blockCost: 65,
       slimeCost: 25,
       archerCost: 35,
+      poisonBogCost: 60,
       slimeCooldown: 8,
       archerCooldown: 12,
+      poisonBogCooldown: 14,
       manaRegenEnabled: true,
       manaRegenInterval: 3,
-      manaRegenAmount: 4,
-      enemyReward: 4,
+      manaRegenAmount: 5,
+      enemyReward: 5,
       digEmptyChance: 0.35,
       digSmallChance: 0.35,
       digSmallMin: 5,
@@ -582,12 +615,12 @@
       soldierHp: 35,
       soldierAttack: 7,
       soldierMove: 0.5,
-      rogueHp: 15,
-      rogueAttack: 4,
-      rogueMove: 0.25,
-      bruteHp: 60,
+      rogueHp: 18,
+      rogueAttack: 5,
+      rogueMove: 0.2,
+      bruteHp: 70,
       bruteAttack: 6,
-      bruteMove: 0.75,
+      bruteMove: 1,
       slimeHp: 45,
       slimeAttack: 8,
       slimeAttackInterval: 1,
@@ -595,13 +628,17 @@
       archerAttack: 9,
       archerAttackInterval: 1.25,
       archerRange: 4,
+      poisonBogRange: 3,
+      poisonBogDamage: 3,
+      poisonBogTickInterval: 1.5,
+      poisonBogSlowMultiplier: 2.5,
       heroAllyCost: 90,
-      heroAllyHp: 150,
-      heroAllyAttack: 12,
-      heroAllyMove: 0.6,
-      heroAllyHealAmount: 10,
+      heroAllyHp: 180,
+      heroAllyAttack: 10,
+      heroAllyMove: 0.5,
+      heroAllyHealAmount: 5,
       heroAllyHealRange: 6,
-      heroAllyHealInterval: 4,
+      heroAllyHealInterval: 2,
       heroEnemySpawnAt: 13,
       heroEnemyHp: 130,
       heroEnemyAttack: 6,
@@ -626,6 +663,114 @@
       CORE: 3,
     };
 
+    const ASSET_PATHS = {
+      tiles: {
+        floor: "assets/tiles/tile_floor.png",
+        wall: "assets/tiles/tile_wall.png",
+        wallDamaged: "assets/tiles/tile_wall_damaged.png",
+        wallBorder: "assets/tiles/tile_wall_border.png",
+        wallHorizontal: "assets/tiles/wall_horizontal.png",
+        wallVertical: "assets/tiles/wall_vertical.png",
+        wallCornerOuterTL: "assets/tiles/wall_corner_outer_tl.png",
+        wallCornerOuterTR: "assets/tiles/wall_corner_outer_tr.png",
+        wallCornerOuterBL: "assets/tiles/wall_corner_outer_bl.png",
+        wallCornerOuterBR: "assets/tiles/wall_corner_outer_br.png",
+        wallEndLeft: "assets/tiles/wall_end_left.png",
+        wallEndRight: "assets/tiles/wall_end_right.png",
+        wallEndTop: "assets/tiles/wall_end_top.png",
+        wallEndBottom: "assets/tiles/wall_end_bottom.png",
+        wallSingle: "assets/tiles/wall_single.png",
+        wallDamagedJunction: "assets/tiles/wall_damaged_junction.png",
+        entrance: "assets/tiles/tile_entrance.png",
+        core: "assets/tiles/tile_core.png",
+      },
+      units: {
+        allySlime: "assets/units/ally_slime.png",
+        allyArcher: "assets/units/ally_archer.png",
+        poisonBog: "assets/units/poison_bog_body.png",
+        allyHeroAil: "assets/units/ally_hero_ail.png",
+        enemySoldier: "assets/units/enemy_soldier.png",
+        enemyRogue: "assets/units/enemy_rogue.png",
+        enemyBrute: "assets/units/enemy_brute.png",
+        enemyHeroPriest: "assets/units/enemy_hero_priest.png",
+      },
+      ui: {
+        iconMana: "assets/ui/icon_mana.png",
+        iconDigPower: "assets/ui/icon_dig_power.png",
+        iconHero: "assets/ui/icon_hero.png",
+        markerSelect: "assets/ui/marker_select.png",
+        markerPlaceOk: "assets/ui/marker_place_ok.png",
+        markerPlaceNo: "assets/ui/marker_place_no.png",
+        markerCoreMove: "assets/ui/marker_core_move.png",
+      },
+      fx: {
+        projectileArrow: "assets/fx/fx_projectile_arrow.png",
+      },
+    };
+
+    const DECOR_TYPES = {
+      PEBBLES: 1,
+      MOSS: 2,
+      TALISMAN: 3,
+      LEAVES: 4,
+      FOXFIRE: 5,
+    };
+
+    function loadAssetTree(paths) {
+      const tree = Array.isArray(paths) ? [] : {};
+      for (const [key, value] of Object.entries(paths)) {
+        if (typeof value === "string") {
+          const image = new Image();
+          image.src = value;
+          tree[key] = image;
+        } else {
+          tree[key] = loadAssetTree(value);
+        }
+      }
+      return tree;
+    }
+
+    const GAME_ASSETS = loadAssetTree(ASSET_PATHS);
+
+    function assetReady(image) {
+      return image && image.complete && image.naturalWidth > 0;
+    }
+
+    function drawAsset(image, x, y, width = TILE, height = TILE) {
+      if (!assetReady(image)) return false;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+      return true;
+    }
+
+    function boardX(x) {
+      return BOARD_OFFSET_X + x * TILE;
+    }
+
+    function boardY(y) {
+      return BOARD_OFFSET_Y + y * TILE;
+    }
+
+    function cellCenterX(x) {
+      return boardX(x) + TILE / 2;
+    }
+
+    function cellCenterY(y) {
+      return boardY(y) + TILE / 2;
+    }
+
+    function eventToCell(event) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const px = (event.clientX - rect.left) * scaleX - BOARD_OFFSET_X;
+      const py = (event.clientY - rect.top) * scaleY - BOARD_OFFSET_Y;
+      return {
+        x: Math.floor(px / TILE),
+        y: Math.floor(py / TILE),
+      };
+    }
+
     const COLORS = {
       wall: "#35323a",
       road: "#aaa2ad",
@@ -639,15 +784,15 @@
       heal: "#85f0a3",
       rogue: "#5fbfd1",
       brute: "#b86852",
-      grid: "rgba(20, 18, 22, 0.45)",
+      grid: "rgba(56, 37, 28, 0.16)",
       path: "rgba(232, 197, 102, 0.18)",
       text: "#f1edf4",
     };
 
     const ENEMY_TYPES = {
-      soldier: { name: "劍士", hpKey: "soldierHp", attackKey: "soldierAttack", moveKey: "soldierMove", color: COLORS.enemy, label: "劍" },
+      soldier: { name: "士兵", hpKey: "soldierHp", attackKey: "soldierAttack", moveKey: "soldierMove", color: COLORS.enemy, label: "兵" },
       rogue: { name: "盜賊", hpKey: "rogueHp", attackKey: "rogueAttack", moveKey: "rogueMove", color: COLORS.rogue, label: "盜" },
-      brute: { name: "重甲", hpKey: "bruteHp", attackKey: "bruteAttack", moveKey: "bruteMove", color: COLORS.brute, label: "重" },
+      brute: { name: "重戰士", hpKey: "bruteHp", attackKey: "bruteAttack", moveKey: "bruteMove", color: COLORS.brute, label: "重" },
     };
 
     const ENEMY_SEQUENCE = [
@@ -676,8 +821,8 @@
 
     const levelRows = [
       "##############################",
-      "#S.....#........#............#",
-      "#......#.....................#",
+      "#Ss....#........#............#",
+      "#ss....#.....................#",
       "#..##..#..####..#..######..###",
       "#..##.....#.....#.......#....#",
       "#..######.#.###########.#.##.#",
@@ -698,6 +843,7 @@
     ];
 
     let grid;
+    let decorMap;
     let entrance;
     let core;
     let selectedAction;
@@ -709,6 +855,7 @@
     let enemies;
     let slimes;
     let archers;
+    let poisonBogs;
     let alliedHero;
     let floatingTexts;
     let visualEffects;
@@ -720,6 +867,7 @@
     let digPowerRegenTimer;
     let slimeCooldownRemaining;
     let archerCooldownRemaining;
+    let poisonBogCooldownRemaining;
     let enemyIntel;
     let hoverCell;
     let lastTime;
@@ -730,6 +878,7 @@
     let blockCount;
     let summonedSlimeCount;
     let summonedArcherCount;
+    let summonedPoisonBogCount;
     let summonedHeroCount;
     let alliedHeroUsed;
     let alliedHeroDead;
@@ -753,6 +902,7 @@
       blockBtn: document.getElementById("blockBtn"),
       slimeBtn: document.getElementById("slimeBtn"),
       archerBtn: document.getElementById("archerBtn"),
+      poisonBogBtn: document.getElementById("poisonBogBtn"),
       heroBtn: document.getElementById("heroBtn"),
       coreBtn: document.getElementById("coreBtn"),
       startBtn: document.getElementById("startBtn"),
@@ -774,8 +924,10 @@
       setBlockCost: document.getElementById("setBlockCost"),
       setSlimeCost: document.getElementById("setSlimeCost"),
       setArcherCost: document.getElementById("setArcherCost"),
+      setPoisonBogCost: document.getElementById("setPoisonBogCost"),
       setSlimeCooldown: document.getElementById("setSlimeCooldown"),
       setArcherCooldown: document.getElementById("setArcherCooldown"),
+      setPoisonBogCooldown: document.getElementById("setPoisonBogCooldown"),
       setManaRegenEnabled: document.getElementById("setManaRegenEnabled"),
       setManaRegenInterval: document.getElementById("setManaRegenInterval"),
       setManaRegenAmount: document.getElementById("setManaRegenAmount"),
@@ -808,6 +960,10 @@
       setArcherAttack: document.getElementById("setArcherAttack"),
       setArcherAttackInterval: document.getElementById("setArcherAttackInterval"),
       setArcherRange: document.getElementById("setArcherRange"),
+      setPoisonBogRange: document.getElementById("setPoisonBogRange"),
+      setPoisonBogDamage: document.getElementById("setPoisonBogDamage"),
+      setPoisonBogTickInterval: document.getElementById("setPoisonBogTickInterval"),
+      setPoisonBogSlowMultiplier: document.getElementById("setPoisonBogSlowMultiplier"),
       setHeroAllyCost: document.getElementById("setHeroAllyCost"),
       setHeroAllyHp: document.getElementById("setHeroAllyHp"),
       setHeroAllyAttack: document.getElementById("setHeroAllyAttack"),
@@ -835,6 +991,19 @@
       settingsStatus: document.getElementById("settingsStatus"),
     };
 
+    function attachStatIcon(target, src, alt) {
+      const stat = target && target.closest(".stat");
+      if (!stat || stat.querySelector(".asset-icon")) return;
+      const icon = document.createElement("img");
+      icon.className = "asset-icon";
+      icon.src = src;
+      icon.alt = alt;
+      stat.insertBefore(icon, stat.firstChild);
+    }
+
+    attachStatIcon(ui.manaText, ASSET_PATHS.ui.iconMana, "mana");
+    attachStatIcon(ui.digPowerText, ASSET_PATHS.ui.iconDigPower, "dig power");
+
     let audioCtx;
     let musicGain;
     let sfxGain;
@@ -849,10 +1018,11 @@
       digPower = settings.digPowerMax;
       coreHp = settings.coreHp;
       phase = "準備階段";
-      message = "先用初始魔素配置史萊姆與地形，準備好後按下開始進攻。";
+      message = "準備階段：配置防線後開始戰鬥。";
       enemies = [];
       slimes = [];
       archers = [];
+      poisonBogs = [];
       alliedHero = null;
       floatingTexts = [];
       visualEffects = [];
@@ -864,6 +1034,7 @@
       digPowerRegenTimer = 0;
       slimeCooldownRemaining = 0;
       archerCooldownRemaining = 0;
+      poisonBogCooldownRemaining = 0;
       enemyIntel = createEnemyIntel();
       hoverCell = null;
       lastTime = performance.now();
@@ -872,6 +1043,7 @@
       blockCount = 0;
       summonedSlimeCount = 0;
       summonedArcherCount = 0;
+      summonedPoisonBogCount = 0;
       summonedHeroCount = 0;
       alliedHeroUsed = false;
       alliedHeroDead = false;
@@ -887,8 +1059,10 @@
           const mark = levelRows[y][x];
           let type = TILE_TYPE.WALL;
           if (mark === ".") type = TILE_TYPE.ROAD;
-          if (mark === "S") {
+          if (mark === "S" || mark === "s") {
             type = TILE_TYPE.ENTRANCE;
+          }
+          if (mark === "S") {
             entrance = { x, y };
           }
           if (mark === "C") {
@@ -900,10 +1074,33 @@
         grid.push(row);
       }
 
+      decorMap = createDecorMap();
       previewPath = findPath(entrance, core, { ignoreUnits: true });
       syncCostLabels();
       updateButtons();
       updateUI();
+    }
+
+    function decorHash(x, y, salt = 0) {
+      const n = Math.sin((x + 1) * 12.9898 + (y + 1) * 78.233 + salt * 37.719) * 43758.5453;
+      return n - Math.floor(n);
+    }
+
+    function createDecorMap() {
+      const map = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          if (grid[y][x] !== TILE_TYPE.ROAD) continue;
+          if (manhattan({ x, y }, entrance) <= 2 || manhattan({ x, y }, core) <= 2) continue;
+          const roll = decorHash(x, y);
+          if (roll < 0.045) map[y][x] = DECOR_TYPES.MOSS;
+          else if (roll < 0.075) map[y][x] = DECOR_TYPES.PEBBLES;
+          else if (roll < 0.095) map[y][x] = DECOR_TYPES.TALISMAN;
+          else if (roll < 0.12) map[y][x] = DECOR_TYPES.LEAVES;
+          else if (roll > 0.985) map[y][x] = DECOR_TYPES.FOXFIRE;
+        }
+      }
+      return map;
     }
 
     function setMessage(text) {
@@ -914,17 +1111,17 @@
     function startAttack() {
       if (phase !== "準備階段") return;
       ensureAudio();
-      phase = "進攻階段";
+      phase = "戰鬥階段";
       spawnTimer = 1.2;
       matchStartedAt = performance.now();
-      setMessage("人類冒險者開始入侵。用史萊姆卡住通道，讓弓手在後方輸出。");
+      setMessage("戰鬥開始，敵人正在入侵地牢。");
       updateUI();
     }
 
     function selectAction(action) {
       selectedAction = action;
-      const names = { dig: "挖掘", block: "封路", slime: "召喚史萊姆", archer: "召喚弓手", hero: "召喚艾爾", core: "移動核心" };
-      setMessage(`目前選擇：${names[action]}。點選地圖格子執行。`);
+      const names = { dig: "挖掘", block: "封路", slime: "召喚史萊姆", archer: "召喚弓箭手", poisonBog: "召喚毒沼", hero: "召喚妖狐神使艾爾", core: "移動核心" };
+      setMessage(`已選擇：${names[action] || action}`);
       updateButtons();
     }
 
@@ -937,17 +1134,18 @@
         gameSpeed = 1;
       }
 
-      ui.speedBtn.textContent = `速度 ${gameSpeed}×`;
+      ui.speedBtn.textContent = `速度 ${gameSpeed}x`;
     }
 
     function updateButtons() {
-      [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn, ui.heroBtn, ui.coreBtn].forEach((button) => {
+      [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn, ui.poisonBogBtn, ui.heroBtn, ui.coreBtn].forEach((button) => {
         button.classList.toggle("active", button.dataset.action === selectedAction);
       });
       ui.startBtn.disabled = phase !== "準備階段" || gameOver;
       ui.digBtn.disabled = digPower < settings.digPowerCost || gameOver;
       ui.slimeBtn.disabled = slimeCooldownRemaining > 0;
       ui.archerBtn.disabled = archerCooldownRemaining > 0;
+      ui.poisonBogBtn.disabled = poisonBogCooldownRemaining > 0;
       ui.heroBtn.disabled = alliedHeroUsed || alliedHeroDead || gameOver;
       ui.coreBtn.disabled = phase !== "準備階段" || gameOver;
     }
@@ -969,13 +1167,15 @@
 
     function syncCostLabels() {
       ui.digBtn.textContent = `挖掘 ${settings.digCost}`;
-      if (settings.digPowerCost > 0) ui.digBtn.textContent += `・挖掘力${settings.digPowerCost}`;
+      if (settings.digPowerCost > 0) ui.digBtn.textContent += ` / 挖掘力 ${settings.digPowerCost}`;
       ui.blockBtn.textContent = `封路 ${settings.blockCost}`;
       const slimeCd = slimeCooldownRemaining > 0 ? ` 冷卻 ${slimeCooldownRemaining.toFixed(1)}s` : "";
       const archerCd = archerCooldownRemaining > 0 ? ` 冷卻 ${archerCooldownRemaining.toFixed(1)}s` : "";
+      const poisonBogCd = poisonBogCooldownRemaining > 0 ? ` 冷卻 ${poisonBogCooldownRemaining.toFixed(1)}s` : "";
       ui.slimeBtn.textContent = `召喚史萊姆 ${settings.slimeCost}${slimeCd}`;
-      ui.archerBtn.textContent = `召喚弓手 ${settings.archerCost}${archerCd}`;
-      ui.heroBtn.textContent = alliedHeroUsed || alliedHeroDead ? "艾爾已出戰" : `召喚艾爾 ${settings.heroAllyCost}`;
+      ui.archerBtn.textContent = `召喚弓箭手 ${settings.archerCost}${archerCd}`;
+      ui.poisonBogBtn.textContent = `召喚毒沼 ${settings.poisonBogCost}${poisonBogCd}`;
+      ui.heroBtn.textContent = alliedHeroUsed || alliedHeroDead ? "英雄已使用" : `召喚妖狐神使艾爾 ${settings.heroAllyCost}`;
       ui.coreBtn.textContent = "移動核心";
     }
 
@@ -992,8 +1192,10 @@
       ui.setBlockCost.value = settings.blockCost;
       ui.setSlimeCost.value = settings.slimeCost;
       ui.setArcherCost.value = settings.archerCost;
+      ui.setPoisonBogCost.value = settings.poisonBogCost;
       ui.setSlimeCooldown.value = settings.slimeCooldown;
       ui.setArcherCooldown.value = settings.archerCooldown;
+      ui.setPoisonBogCooldown.value = settings.poisonBogCooldown;
       ui.setManaRegenEnabled.checked = settings.manaRegenEnabled;
       ui.setManaRegenInterval.value = settings.manaRegenInterval;
       ui.setManaRegenAmount.value = settings.manaRegenAmount;
@@ -1026,6 +1228,10 @@
       ui.setArcherAttack.value = settings.archerAttack;
       ui.setArcherAttackInterval.value = settings.archerAttackInterval;
       ui.setArcherRange.value = settings.archerRange;
+      ui.setPoisonBogRange.value = settings.poisonBogRange;
+      ui.setPoisonBogDamage.value = settings.poisonBogDamage;
+      ui.setPoisonBogTickInterval.value = settings.poisonBogTickInterval;
+      ui.setPoisonBogSlowMultiplier.value = settings.poisonBogSlowMultiplier;
       ui.setHeroAllyCost.value = settings.heroAllyCost;
       ui.setHeroAllyHp.value = settings.heroAllyHp;
       ui.setHeroAllyAttack.value = settings.heroAllyAttack;
@@ -1051,7 +1257,7 @@
       saveSettingsToStorage(settings);
       updateAudioVolumes();
       init();
-      setMessage("設定已套用並保存，關卡已重新開始。");
+      setMessage("設定已套用，關卡已重置。");
     }
 
     function collectSettingsFromForm() {
@@ -1068,8 +1274,10 @@
         blockCost: readNumber(ui.setBlockCost, DEFAULT_SETTINGS.blockCost),
         slimeCost: readNumber(ui.setSlimeCost, DEFAULT_SETTINGS.slimeCost),
         archerCost: readNumber(ui.setArcherCost, DEFAULT_SETTINGS.archerCost),
+        poisonBogCost: readNumber(ui.setPoisonBogCost, DEFAULT_SETTINGS.poisonBogCost),
         slimeCooldown: readNumber(ui.setSlimeCooldown, DEFAULT_SETTINGS.slimeCooldown),
         archerCooldown: readNumber(ui.setArcherCooldown, DEFAULT_SETTINGS.archerCooldown),
+        poisonBogCooldown: readNumber(ui.setPoisonBogCooldown, DEFAULT_SETTINGS.poisonBogCooldown),
         manaRegenEnabled: ui.setManaRegenEnabled.checked,
         manaRegenInterval: readNumber(ui.setManaRegenInterval, DEFAULT_SETTINGS.manaRegenInterval),
         manaRegenAmount: readNumber(ui.setManaRegenAmount, DEFAULT_SETTINGS.manaRegenAmount),
@@ -1102,6 +1310,10 @@
         archerAttack: readNumber(ui.setArcherAttack, DEFAULT_SETTINGS.archerAttack),
         archerAttackInterval: readNumber(ui.setArcherAttackInterval, DEFAULT_SETTINGS.archerAttackInterval),
         archerRange: readNumber(ui.setArcherRange, DEFAULT_SETTINGS.archerRange),
+        poisonBogRange: readNumber(ui.setPoisonBogRange, DEFAULT_SETTINGS.poisonBogRange),
+        poisonBogDamage: readNumber(ui.setPoisonBogDamage, DEFAULT_SETTINGS.poisonBogDamage),
+        poisonBogTickInterval: readNumber(ui.setPoisonBogTickInterval, DEFAULT_SETTINGS.poisonBogTickInterval),
+        poisonBogSlowMultiplier: readNumber(ui.setPoisonBogSlowMultiplier, DEFAULT_SETTINGS.poisonBogSlowMultiplier),
         heroAllyCost: readNumber(ui.setHeroAllyCost, DEFAULT_SETTINGS.heroAllyCost),
         heroAllyHp: readNumber(ui.setHeroAllyHp, DEFAULT_SETTINGS.heroAllyHp),
         heroAllyAttack: readNumber(ui.setHeroAllyAttack, DEFAULT_SETTINGS.heroAllyAttack),
@@ -1172,7 +1384,7 @@
         localStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch (error) {
-        setSettingsStatus("瀏覽器拒絕寫入本機儲存。");
+        setSettingsStatus("儲存失敗，請檢查瀏覽器儲存空間。");
         return false;
       }
     }
@@ -1213,19 +1425,19 @@
     function saveCurrentSettingsFromForm() {
       const nextSettings = collectSettingsFromForm();
       if (saveSettingsToStorage(nextSettings)) {
-        setSettingsStatus("目前參數已儲存，按「套用並重開」後生效。");
+        setSettingsStatus("目前參數已儲存。");
       }
     }
 
     function loadSavedSettingsIntoForm() {
       const savedSettings = loadSettingsFromStorage();
       fillSettingsForm(savedSettings);
-      setSettingsStatus("已載入儲存參數，按「套用並重開」後生效。");
+      setSettingsStatus("已載入儲存的參數。");
     }
 
     function resetSettingsToDefault() {
       fillSettingsForm(DEFAULT_SETTINGS);
-      setSettingsStatus("已恢復預設參數，按「套用並重開」後生效。");
+      setSettingsStatus("已套用預設參數，尚未儲存。");
     }
 
     function exportCurrentSettings() {
@@ -1247,9 +1459,9 @@
           const importedSettings = normalizeSettings(parsed.settings || parsed);
           fillSettingsForm(importedSettings);
           saveSettingsToStorage(importedSettings);
-          setSettingsStatus("參數已匯入並儲存，按「套用並重開」後生效。");
+          setSettingsStatus("參數已匯入並儲存。");
         } catch (error) {
-          setSettingsStatus("匯入失敗，請確認檔案是參數 JSON。");
+          setSettingsStatus("匯入失敗，請確認檔案是有效的 JSON。");
         } finally {
           ui.settingsFileInput.value = "";
         }
@@ -1269,7 +1481,7 @@
 
     function clearMatchRecords() {
       saveMatchRecords([]);
-      setSettingsStatus("對局紀錄已清空。");
+      setSettingsStatus("對局紀錄已清除。");
     }
 
     function ensureAudio() {
@@ -1369,7 +1581,7 @@
         if (!enemyIntel.coreDiscovered && canEnemySeeCore(enemy)) {
           enemyIntel.coreDiscovered = true;
           enemyIntel.mode = "assault";
-          setMessage("入侵者發現核心位置了，敵方情報已共享。");
+          setMessage("敵人發現核心位置，開始共享情報。");
         }
       }
 
@@ -1393,7 +1605,7 @@
         enemyIntel.breakthroughTimer = settings.breakthroughSeconds;
         enemyIntel.stuckTimer = 0;
         for (const enemy of enemies) enemy.path = [];
-        setMessage("敵方攻勢受阻，開始搜尋其他突破口。");
+        setMessage("敵方進攻受阻，開始尋找其他突破口。");
       }
 
       if (enemyIntel.mode === "breakthrough") {
@@ -1434,6 +1646,7 @@
         enemies: enemies.map((enemy) => ({ type: enemy.type, x: enemy.x, y: enemy.y, hp: enemy.hp, pathLen: enemy.path.length })),
         slimes: slimes.map((slime) => ({ x: slime.x, y: slime.y, hp: slime.hp })),
         archers: archers.map((archer) => ({ x: archer.x, y: archer.y, hp: archer.hp })),
+        poisonBogs: poisonBogs.map((bog) => ({ x: bog.x, y: bog.y })),
         alliedHero: alliedHero ? { x: alliedHero.x, y: alliedHero.y, hp: alliedHero.hp } : null,
       };
     }
@@ -1483,7 +1696,7 @@
     }
 
     function unitAt(x, y) {
-      return enemyAt(x, y) || monsterAt(x, y);
+      return enemyAt(x, y) || monsterAt(x, y) || poisonBogAt(x, y);
     }
 
     function enemyAt(x, y) {
@@ -1500,6 +1713,10 @@
 
     function archerAt(x, y) {
       return archers.find((a) => a.x === x && a.y === y);
+    }
+
+    function poisonBogAt(x, y) {
+      return poisonBogs.find((bog) => bog.x === x && bog.y === y);
     }
 
     function monsterAt(x, y) {
@@ -1636,6 +1853,7 @@
       if (selectedAction === "block") blockTile(x, y);
       if (selectedAction === "slime") summonSlime(x, y);
       if (selectedAction === "archer") summonArcher(x, y);
+      if (selectedAction === "poisonBog") summonPoisonBog(x, y);
       if (selectedAction === "hero") summonAlliedHero(x, y);
       if (selectedAction === "core") moveCore(x, y);
       updateUI();
@@ -1647,11 +1865,11 @@
         return;
       }
       if (x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1) {
-        setMessage("邊界牆不可挖掘。");
+        setMessage("邊界牆不能挖掘。");
         return;
       }
       if (digPower < settings.digPowerCost) {
-        setMessage("挖掘力不足。進攻階段會隨時間恢復。");
+        setMessage("挖掘力不足。");
         return;
       }
       if (!spend(settings.digCost)) return;
@@ -1666,17 +1884,17 @@
       }
       digCount++;
       recomputePaths();
-      const result = foundMana > 0 ? `挖到 ${foundMana} 魔素，但地下城破口變大了。` : "這面牆是空的，只留下新的破口。";
+      const result = foundMana > 0 ? `挖到 ${foundMana} 魔素，但地牢多了一個破口。` : "挖開牆壁，但沒有找到魔素。";
       setMessage(result);
     }
 
     function blockTile(x, y) {
       if (grid[y][x] !== TILE_TYPE.ROAD) {
-        setMessage("只能封閉普通道路。");
+        setMessage("只能在道路上封路。");
         return;
       }
       if (unitAt(x, y)) {
-        setMessage("有單位停在這格，不能封路。");
+        setMessage("已有單位佔據，不能封路。");
         return;
       }
 
@@ -1686,7 +1904,7 @@
       grid[y][x] = original;
 
       if (!routeStillExists) {
-        setMessage("不能完全封死入口到核心的路。");
+        setMessage("不能完全封死通往核心的路。");
         return;
       }
       if (!spend(settings.blockCost)) return;
@@ -1694,28 +1912,28 @@
       forgetDeadEnds();
       blockCount++;
       recomputePaths();
-      setMessage("道路已封閉，入侵者將被迫改道。");
+      setMessage("已封路，敵方會重新判斷路線。");
     }
 
     function moveCore(x, y) {
       if (phase !== "準備階段") {
-        setMessage("開始進攻後不能移動核心。");
+        setMessage("只能在準備階段移動核心。");
         return;
       }
-      if (isSame({ x, y }, entrance)) {
-        setMessage("核心不能放在入口。");
+      if (isEntranceArea(x, y)) {
+        setMessage("核心不能放在入口區。");
         return;
       }
       if (unitAt(x, y)) {
-        setMessage("有單位停在這格，不能放置核心。");
+        setMessage("已有單位佔據，不能移動核心。");
         return;
       }
       if (manhattan(entrance, { x, y }) < settings.coreMinDistance) {
-        setMessage(`核心離入口太近，至少需要 ${settings.coreMinDistance} 格距離。`);
+        setMessage(`核心距離入口至少需要 ${settings.coreMinDistance} 格。`);
         return;
       }
       if (grid[y][x] !== TILE_TYPE.ROAD) {
-        setMessage("核心只能移動到既有的普通道路上。");
+        setMessage("核心只能放在道路上。");
         return;
       }
 
@@ -1728,7 +1946,7 @@
       if (!routeStillExists) {
         grid[y][x] = oldTargetType;
         grid[oldCore.y][oldCore.x] = TILE_TYPE.CORE;
-        setMessage("這個位置沒有可通行路線，核心放不過去。");
+        setMessage("這個位置會讓路線中斷，不能移動核心。");
         return;
       }
 
@@ -1736,12 +1954,12 @@
       coreHp = settings.coreHp;
       enemyIntel = createEnemyIntel();
       recomputePaths();
-      setMessage("核心位置已更新。進攻開始後，敵人仍需要先探索到核心。");
+      setMessage("核心已移動，敵方情報重置。");
     }
 
     function summonSlime(x, y) {
       if (!canSummonAt(x, y, "史萊姆")) return;
-      if (phase === "進攻階段" && slimeCooldownRemaining > 0) {
+      if (phase === "戰鬥階段" && slimeCooldownRemaining > 0) {
         setMessage(`史萊姆召喚冷卻中：${slimeCooldownRemaining.toFixed(1)} 秒。`);
         return;
       }
@@ -1758,17 +1976,18 @@
         homeY: y,
         roamRadius: 3,
         roamTimer: 0.4,
+        facing: 1,
       });
-      slimeCooldownRemaining = phase === "進攻階段" ? settings.slimeCooldown : 0;
+      slimeCooldownRemaining = phase === "戰鬥階段" ? settings.slimeCooldown : 0;
       summonedSlimeCount++;
       recomputePaths();
-      setMessage("史萊姆已召喚。它會擋住通道並攻擊相鄰敵人。");
+      setMessage("史萊姆已召喚。");
     }
 
     function summonArcher(x, y) {
-      if (!canSummonAt(x, y, "弓手")) return;
-      if (phase === "進攻階段" && archerCooldownRemaining > 0) {
-        setMessage(`弓手召喚冷卻中：${archerCooldownRemaining.toFixed(1)} 秒。`);
+      if (!canSummonAt(x, y, "弓箭手")) return;
+      if (phase === "戰鬥階段" && archerCooldownRemaining > 0) {
+        setMessage(`弓箭手召喚冷卻中：${archerCooldownRemaining.toFixed(1)} 秒。`);
         return;
       }
       if (!spend(settings.archerCost)) return;
@@ -1785,19 +2004,43 @@
         homeY: y,
         roamRadius: 2,
         roamTimer: 0.5,
+        facing: 1,
       });
-      archerCooldownRemaining = phase === "進攻階段" ? settings.archerCooldown : 0;
+      archerCooldownRemaining = phase === "戰鬥階段" ? settings.archerCooldown : 0;
       summonedArcherCount++;
       recomputePaths();
-      setMessage("弓手已召喚。把它放在史萊姆後方，可以穩定輸出。");
+      setMessage("弓箭手已召喚。");
+    }
+
+    function summonPoisonBog(x, y) {
+      if (!canSummonAt(x, y, "毒沼")) return;
+      if (phase === "戰鬥階段" && poisonBogCooldownRemaining > 0) {
+        setMessage(`毒沼召喚冷卻中：${poisonBogCooldownRemaining.toFixed(1)} 秒。`);
+        return;
+      }
+      if (!spend(settings.poisonBogCost)) return;
+      poisonBogs.push({
+        x,
+        y,
+        name: "毒沼",
+        tickTimer: 0.25,
+        pulse: 0,
+        flash: 0,
+        homeX: x,
+        homeY: y,
+      });
+      poisonBogCooldownRemaining = phase === "戰鬥階段" ? settings.poisonBogCooldown : 0;
+      summonedPoisonBogCount++;
+      spawnRingEffect(x, y, settings.poisonBogRange, "#b6ff28", 0.65);
+      setMessage("毒沼已召喚，會週期性傷害並緩速範圍內敵人。");
     }
 
     function summonAlliedHero(x, y) {
       if (alliedHeroUsed || alliedHeroDead) {
-        setMessage("艾爾本局已經出戰過，不能再次召喚。");
+        setMessage("英雄每局只能召喚一次。");
         return;
       }
-      if (!canSummonAt(x, y, "艾爾")) return;
+      if (!canSummonAt(x, y, "英雄")) return;
       if (!spend(settings.heroAllyCost)) return;
       alliedHero = {
         x,
@@ -1813,30 +2056,35 @@
         homeX: x,
         homeY: y,
         roamRadius: 4,
+        facing: 1,
       };
       alliedHeroUsed = true;
       summonedHeroCount++;
       spawnRingEffect(x, y, settings.heroAllyHealRange, COLORS.alliedHero, 0.65);
       playHeroArrivalSound();
       recomputePaths();
-      setMessage("妖狐神使艾爾降臨。她會週期性治療周圍的我方召喚生物。");
+      setMessage("妖狐神使 艾爾登場。");
     }
 
     function canSummonAt(x, y, unitName) {
       if (grid[y][x] !== TILE_TYPE.ROAD) {
-        setMessage(`${unitName}只能召喚在普通道路上。`);
+        setMessage(`${unitName}只能召喚在道路上。`);
         return false;
       }
       if (isNearEntrance(x, y, 5)) {
-        setMessage("入口 5 格內不能執行召喚。");
+        setMessage("入口 5 格內不能召喚。");
         return false;
       }
       if (monsterAt(x, y)) {
         setMessage("這格已經有我方單位。");
         return false;
       }
+      if (poisonBogAt(x, y)) {
+        setMessage("這格已經有毒沼。");
+        return false;
+      }
       if (enemyAt(x, y)) {
-        setMessage("這格已經有單位。");
+        setMessage("這格已有敵方單位。");
         return false;
       }
       return true;
@@ -1868,6 +2116,7 @@
         exploreTarget: null,
         visited: new Set([`${entrance.x},${entrance.y}`]),
         flash: 0,
+        facing: 1,
       };
       enemies.push(enemy);
       spawnedCount++;
@@ -1898,29 +2147,32 @@
         path: [],
         visited: new Set([`${entrance.x},${entrance.y}`]),
         flash: 0,
+        facing: 1,
       };
       enemies.push(priest);
       spawnRingEffect(priest.x, priest.y, settings.heroEnemyHealRange, COLORS.enemyHero, 0.65);
       playHeroArrivalSound();
-      setMessage("冒險者祭司加入戰線。敵方部隊開始獲得治療支援。");
+      setMessage("冒險者祭司登場，敵方獲得治療支援。");
     }
     function update(dt) {
       if (gameOver) return;
 
       dt *= gameSpeed;
 
-      if (phase === "進攻階段") {
+      if (phase === "戰鬥階段") {
         slimeCooldownRemaining = Math.max(0, slimeCooldownRemaining - dt);
         archerCooldownRemaining = Math.max(0, archerCooldownRemaining - dt);
+        poisonBogCooldownRemaining = Math.max(0, poisonBogCooldownRemaining - dt);
         updateManaRegen(dt);
         updateDigPowerRegen(dt);
       } else {
         slimeCooldownRemaining = 0;
         archerCooldownRemaining = 0;
+        poisonBogCooldownRemaining = 0;
         manaRegenTimer = 0;
         digPowerRegenTimer = 0;
       }
-      if (phase === "進攻階段") {
+      if (phase === "戰鬥階段") {
         spawnTimer -= dt;
         if (!enemyHeroSpawned && spawnedCount >= settings.heroEnemySpawnAt) {
           spawnEnemyHero();
@@ -1932,12 +2184,15 @@
         updateEnemyIntel(dt);
       }
 
-      updateMonsterMovement(dt);
+      if (phase === "戰鬥階段") {
+        updateMonsterMovement(dt);
+      }
       updateHeroAuras(dt);
       const attackClaims = new Map();
       updateSlimes(dt, attackClaims);
       updateArchers(dt, attackClaims);
       updateAlliedHeroAttack(dt, attackClaims);
+      updatePoisonBogs(dt);
       updateEnemies(dt);
       updateFeedback(dt);
       cleanDeadUnits();
@@ -1992,11 +2247,16 @@
 
     function updateAlliedHeroMovement(hero, dt) {
       hero.moveTimer -= dt;
-      if (hero.moveTimer > 0 || enemies.length === 0) return;
-      hero.moveTimer = settings.heroAllyMove;
+      if (hero.moveTimer > 0) return;
 
       const current = { x: hero.x, y: hero.y };
       const candidates = getMonsterMoveCandidates(hero);
+      if (enemies.length === 0) {
+        hero.moveTimer = 1.25 + Math.random() * 1.1;
+        moveMonsterToIdleCandidate(hero, candidates, current);
+        return;
+      }
+      hero.moveTimer = settings.heroAllyMove;
       const score = (pos) => {
         let value = -0.15 * manhattan(pos, { x: hero.homeX, y: hero.homeY });
         for (const ally of [...slimes, ...archers]) {
@@ -2016,11 +2276,16 @@
 
     function updateSlimeMovement(slime, dt) {
       slime.roamTimer -= dt;
-      if (slime.roamTimer > 0 || enemies.length === 0) return;
-      slime.roamTimer = 0.65;
+      if (slime.roamTimer > 0) return;
 
       const current = { x: slime.x, y: slime.y };
       const candidates = getMonsterMoveCandidates(slime);
+      if (enemies.length === 0) {
+        slime.roamTimer = 1.1 + Math.random() * 0.9;
+        moveMonsterToIdleCandidate(slime, candidates, current);
+        return;
+      }
+      slime.roamTimer = 0.65;
       const score = (pos) => {
         let value = -0.2 * manhattan(pos, { x: slime.homeX, y: slime.homeY });
         for (const enemy of enemies) {
@@ -2037,11 +2302,16 @@
 
     function updateArcherMovement(archer, dt) {
       archer.roamTimer -= dt;
-      if (archer.roamTimer > 0 || enemies.length === 0) return;
-      archer.roamTimer = 0.9;
+      if (archer.roamTimer > 0) return;
 
       const current = { x: archer.x, y: archer.y };
       const candidates = getMonsterMoveCandidates(archer);
+      if (enemies.length === 0) {
+        archer.roamTimer = 1.2 + Math.random() * 1.1;
+        moveMonsterToIdleCandidate(archer, candidates, current);
+        return;
+      }
+      archer.roamTimer = 0.9;
       const score = (pos) => {
         let value = -0.25 * manhattan(pos, { x: archer.homeX, y: archer.homeY });
         for (const enemy of enemies) {
@@ -2066,6 +2336,26 @@
       });
     }
 
+    function moveMonsterToIdleCandidate(monster, candidates, current) {
+      if (candidates.length <= 1) return;
+      const home = { x: monster.homeX, y: monster.homeY };
+      const currentDistance = manhattan(current, home);
+      const scored = candidates.map((candidate) => {
+        const distance = manhattan(candidate, home);
+        let value = Math.random() * 1.25 - distance * 0.38;
+        if (isSame(candidate, current)) value += 0.28;
+        if (distance < currentDistance) value += 0.25;
+        if (distance > currentDistance) value -= 0.1;
+        return { candidate, value };
+      }).sort((a, b) => b.value - a.value);
+      const best = scored[0]?.candidate;
+      if (!best || isSame(best, current)) return;
+      updateFacingFromMove(monster, current, best);
+      monster.x = best.x;
+      monster.y = best.y;
+      recomputePaths();
+    }
+
     function moveMonsterToBestCandidate(monster, candidates, current, score, threshold) {
       let best = current;
       let bestScore = score(current);
@@ -2077,6 +2367,7 @@
         }
       }
       if (!isSame(best, current) && bestScore >= score(current) + threshold) {
+        updateFacingFromMove(monster, current, best);
         monster.x = best.x;
         monster.y = best.y;
         recomputePaths();
@@ -2190,6 +2481,42 @@
       }
     }
 
+    function isEnemyInsidePoisonBog(enemy) {
+      return poisonBogs.some((bog) => (
+        manhattan(bog, enemy) <= settings.poisonBogRange && hasLineOfSight(bog, enemy)
+      ));
+    }
+
+    function updatePoisonBogs(dt) {
+      for (const enemy of enemies) {
+        enemy.poisoned = isEnemyInsidePoisonBog(enemy);
+      }
+
+      for (const bog of poisonBogs) {
+        bog.flash = Math.max(0, (bog.flash || 0) - dt);
+        bog.pulse = (bog.pulse || 0) + dt;
+        bog.tickTimer -= dt;
+        if (bog.tickTimer > 0) continue;
+
+        const interval = Math.max(0.1, settings.poisonBogTickInterval);
+        const ticks = Math.max(1, Math.floor(Math.abs(bog.tickTimer) / interval) + 1);
+        bog.tickTimer += ticks * interval;
+        bog.flash = 0.22;
+        spawnRingEffect(bog.x, bog.y, settings.poisonBogRange, "#b6ff28", 0.42);
+
+        const targets = enemies.filter((enemy) => manhattan(bog, enemy) <= settings.poisonBogRange && hasLineOfSight(bog, enemy));
+        for (const enemy of targets) {
+          damageUnit(enemy, settings.poisonBogDamage * ticks, "#b6ff28");
+          enemy.poisoned = true;
+        }
+      }
+    }
+
+    function getEnemyMoveInterval(enemy) {
+      const slow = enemy.poisoned ? Math.max(1, settings.poisonBogSlowMultiplier) : 1;
+      return enemy.moveInterval * slow;
+    }
+
     function updateEnemies(dt) {
       for (const enemy of enemies) {
         enemy.attackTimer -= dt;
@@ -2202,7 +2529,7 @@
           if (!enemyIntel.coreDiscovered) {
             enemyIntel.coreDiscovered = true;
             enemyIntel.mode = "assault";
-            setMessage("入侵者發現核心位置了，敵方情報已共享。");
+            setMessage("敵人發現核心位置，開始共享情報。");
           }
           if (enemy.attackTimer <= 0) {
             coreHp -= enemy.attack;
@@ -2214,7 +2541,7 @@
 
         if (enemy.moveTimer <= 0) {
           moveEnemy(enemy);
-          enemy.moveTimer = enemy.moveInterval;
+          enemy.moveTimer = getEnemyMoveInterval(enemy);
         }
       }
     }
@@ -2229,8 +2556,8 @@
     function spawnFloatingText(text, x, y, color) {
       floatingTexts.push({
         text,
-        x: x * TILE + TILE / 2,
-        y: y * TILE + TILE / 2 - 18,
+        x: cellCenterX(x),
+        y: cellCenterY(y) - 18,
         color,
         life: 0.7,
       });
@@ -2239,8 +2566,8 @@
     function spawnRingEffect(x, y, radius, color, life = 0.55) {
       visualEffects.push({
         type: "ring",
-        x: x * TILE + TILE / 2,
-        y: y * TILE + TILE / 2,
+        x: cellCenterX(x),
+        y: cellCenterY(y),
         radius: radius * TILE,
         color,
         life,
@@ -2265,7 +2592,7 @@
       if (canEnemySeeCore(enemy) && !enemyIntel.coreDiscovered) {
         enemyIntel.coreDiscovered = true;
         enemyIntel.mode = "assault";
-        setMessage("入侵者發現核心位置了，敵方情報已共享。");
+        setMessage("敵人發現核心位置，開始共享情報。");
       }
 
       if (!enemy.path || enemy.path.length === 0) {
@@ -2276,6 +2603,7 @@
       const next = enemy.path[0];
 
       if (isSame(next, core)) return;
+      updateFacingFromMove(enemy, enemy, next);
 
       let passedBlocker = false;
       const blockingMonster = monsterAt(next.x, next.y);
@@ -2518,7 +2846,7 @@
           spawnFloatingText(`+${enemy.reward}`, enemy.x, enemy.y, "#8fe68f");
         }
         playDeathSound();
-        setMessage(`擊敗 ${deadEnemies.length} 名敵人，回收 ${reward} 魔素。`);
+        setMessage(`擊倒 ${deadEnemies.length} 名敵人，獲得 ${reward} 魔素。`);
         recomputePaths();
       }
 
@@ -2534,27 +2862,27 @@
       }
       if (beforeSlimes !== slimes.length || beforeArchers !== archers.length || heroDied) {
         playDeathSound();
-        setMessage(heroDied ? "妖狐神使艾爾倒下了，本局無法再次召喚。" : "魔物被擊倒了，防線出現缺口。");
+        setMessage(heroDied ? "妖狐神使 艾爾戰敗，本局不能再次召喚。" : "我方單位戰敗。");
         recomputePaths();
       }
     }
 
     function checkEndConditions() {
       if (coreHp <= 0) {
-        phase = "核心被摧毀";
+        phase = "防守失敗";
         gameOver = true;
         playDefeatSound();
         recordMatchResult("失敗");
-        setMessage("核心被摧毀。這局防衛失敗，可以重新挑戰。");
+        setMessage("核心被摧毀，防守失敗。");
         return;
       }
 
-      if (phase === "進攻階段" && spawnedCount >= settings.enemyCount && enemies.length === 0) {
-        phase = "防衛成功";
+      if (phase === "戰鬥階段" && spawnedCount >= settings.enemyCount && enemies.length === 0) {
+        phase = "防守成功";
         gameOver = true;
         playVictorySound();
         recordMatchResult("勝利");
-        setMessage("防衛成功。史萊姆防線守住了地下城核心。");
+        setMessage("防守成功，所有敵人已被擊退。");
       }
     }
 
@@ -2578,6 +2906,7 @@
           enemiesRemaining: enemies.length,
           slimesRemaining: slimes.length,
           archersRemaining: archers.length,
+          poisonBogsRemaining: poisonBogs.length,
           alliedHeroAlive: Boolean(alliedHero),
         },
         actions: {
@@ -2585,6 +2914,7 @@
           blockCount,
           summonedSlimeCount,
           summonedArcherCount,
+          summonedPoisonBogCount,
           summonedHeroCount,
           manaGainedFromDig,
           manaGainedFromRegen,
@@ -2603,8 +2933,24 @@
       return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
+    function updateFacingFromMove(unit, from, to) {
+      if (!unit || !from || !to || to.x === from.x) return;
+      unit.facing = to.x > from.x ? 1 : -1;
+    }
+
+    function isEntranceArea(x, y) {
+      return entrance && x >= entrance.x && x <= entrance.x + 1 && y >= entrance.y && y <= entrance.y + 1;
+    }
+
+    function distanceToEntranceArea(x, y) {
+      if (!entrance) return Infinity;
+      const dx = x < entrance.x ? entrance.x - x : x > entrance.x + 1 ? x - (entrance.x + 1) : 0;
+      const dy = y < entrance.y ? entrance.y - y : y > entrance.y + 1 ? y - (entrance.y + 1) : 0;
+      return dx + dy;
+    }
+
     function isNearEntrance(x, y, range) {
-      return manhattan({ x, y }, entrance) <= range;
+      return distanceToEntranceArea(x, y) <= range;
     }
 
     function getEnemyNextStep(enemy) {
@@ -2628,12 +2974,173 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawGrid();
+      ctx.fillStyle = "#1f1713";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawAssetGrid();
       drawPreviewPath();
+      drawHoverMarker();
       drawPlacementPreview();
-      drawUnits();
+      drawPoisonBogAuras();
+      drawPoisonBogs();
+      drawAssetUnits();
       drawFeedback();
       requestAnimationFrame(draw);
+    }
+
+    function isBorderTile(x, y) {
+      return x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1;
+    }
+
+    function isWallLike(x, y) {
+      return !isInside(x, y) || grid[y][x] === TILE_TYPE.WALL;
+    }
+
+    function getWallMask(x, y) {
+      let mask = 0;
+      if (isWallLike(x, y - 1)) mask += 1;
+      if (isWallLike(x + 1, y)) mask += 2;
+      if (isWallLike(x, y + 1)) mask += 4;
+      if (isWallLike(x - 1, y)) mask += 8;
+      return mask;
+    }
+
+    function getWallAssetByMask(mask) {
+      const tiles = GAME_ASSETS.tiles;
+      const wallByMask = {
+        0: tiles.wallSingle,
+        1: tiles.wallEndBottom,
+        2: tiles.wallEndLeft,
+        4: tiles.wallEndTop,
+        8: tiles.wallEndRight,
+        3: tiles.wallCornerOuterBL,
+        6: tiles.wallCornerOuterTL,
+        12: tiles.wallCornerOuterTR,
+        9: tiles.wallCornerOuterBR,
+        5: tiles.wallVertical,
+        10: tiles.wallHorizontal,
+      };
+      return wallByMask[mask] || tiles.wallDamagedJunction || tiles.wallDamaged || tiles.wall;
+    }
+
+    function getTileAsset(type, x, y) {
+      if (type === TILE_TYPE.ROAD) return GAME_ASSETS.tiles.floor;
+      if (type === TILE_TYPE.ENTRANCE) return GAME_ASSETS.tiles.floor;
+      if (type === TILE_TYPE.CORE) return GAME_ASSETS.tiles.core;
+      return getWallAssetByMask(getWallMask(x, y));
+    }
+
+    function drawTileFallback(type, x, y) {
+      ctx.fillStyle = COLORS.wall;
+      if (type === TILE_TYPE.ROAD) ctx.fillStyle = COLORS.road;
+      if (type === TILE_TYPE.ENTRANCE) ctx.fillStyle = COLORS.entrance;
+      if (type === TILE_TYPE.CORE) ctx.fillStyle = COLORS.core;
+      ctx.fillRect(boardX(x), boardY(y), TILE, TILE);
+      if (type === TILE_TYPE.ENTRANCE) drawTileLabel("入", x, y);
+      if (type === TILE_TYPE.CORE) drawTileLabel("核", x, y);
+    }
+
+    function drawAssetGrid() {
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const type = grid[y][x];
+          if (!drawAsset(getTileAsset(type, x, y), boardX(x), boardY(y))) {
+            drawTileFallback(type, x, y);
+          }
+          ctx.strokeStyle = COLORS.grid;
+          ctx.strokeRect(boardX(x) + 0.5, boardY(y) + 0.5, TILE - 1, TILE - 1);
+        }
+      }
+      drawEntranceAsset();
+      drawMapDecor();
+      drawCoreAura();
+    }
+
+    function drawEntranceAsset() {
+      if (!entrance) return;
+      const px = boardX(entrance.x);
+      const py = boardY(entrance.y);
+      if (drawAsset(GAME_ASSETS.tiles.entrance, px, py, TILE * 2, TILE * 2)) return;
+      ctx.fillStyle = COLORS.entrance;
+      ctx.fillRect(px, py, TILE * 2, TILE * 2);
+    }
+
+    function drawMapDecor() {
+      if (!decorMap) return;
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const type = decorMap[y][x];
+          if (!type) continue;
+          drawDecor(type, x, y);
+        }
+      }
+    }
+
+    function drawDecor(type, x, y) {
+      const px = boardX(x);
+      const py = boardY(y);
+      const jitterX = Math.floor(decorHash(x, y, 2) * 18) - 9;
+      const jitterY = Math.floor(decorHash(x, y, 3) * 14) - 7;
+      ctx.save();
+      if (type === DECOR_TYPES.PEBBLES) {
+        ctx.fillStyle = "#6b4632";
+        ctx.fillRect(px + 18 + jitterX, py + 31 + jitterY, 5, 4);
+        ctx.fillStyle = "#d4a05f";
+        ctx.fillRect(px + 25 + jitterX, py + 27 + jitterY, 4, 3);
+      } else if (type === DECOR_TYPES.MOSS) {
+        ctx.fillStyle = "rgba(72, 88, 46, 0.72)";
+        ctx.fillRect(px + 8 + jitterX, py + 34 + jitterY, 20, 5);
+        ctx.fillRect(px + 15 + jitterX, py + 28 + jitterY, 12, 4);
+        ctx.fillStyle = "rgba(128, 120, 54, 0.66)";
+        ctx.fillRect(px + 27 + jitterX, py + 37 + jitterY, 8, 3);
+      } else if (type === DECOR_TYPES.TALISMAN) {
+        ctx.translate(px + 21 + jitterX, py + 26 + jitterY);
+        ctx.rotate((decorHash(x, y, 4) - 0.5) * 0.6);
+        ctx.fillStyle = "#e8d3a1";
+        ctx.fillRect(-4, -10, 8, 20);
+        ctx.fillStyle = "#a54a36";
+        ctx.fillRect(-2, -6, 4, 3);
+        ctx.fillRect(-1, 1, 2, 6);
+      } else if (type === DECOR_TYPES.LEAVES) {
+        ctx.fillStyle = "#a85c38";
+        ctx.fillRect(px + 16 + jitterX, py + 34 + jitterY, 8, 4);
+        ctx.fillStyle = "#d49442";
+        ctx.fillRect(px + 25 + jitterX, py + 31 + jitterY, 6, 4);
+        ctx.fillStyle = "#7c4f2e";
+        ctx.fillRect(px + 31 + jitterX, py + 38 + jitterY, 7, 3);
+      } else if (type === DECOR_TYPES.FOXFIRE) {
+        const cx = px + TILE / 2 + jitterX;
+        const cy = py + TILE / 2 + jitterY;
+        ctx.globalAlpha = 0.78;
+        ctx.fillStyle = "#49e0d0";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 0.28;
+        ctx.strokeStyle = "#91fff3";
+        ctx.beginPath();
+        ctx.arc(cx, cy, 11, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawCoreAura() {
+      if (!core) return;
+      const cx = cellCenterX(core.x);
+      const cy = cellCenterY(core.y);
+      ctx.save();
+      ctx.globalAlpha = 0.24;
+      ctx.fillStyle = "#ffb83f";
+      ctx.beginPath();
+      ctx.arc(cx, cy + 4, TILE * 1.05, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = "#ffd76d";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy + 4, TILE * 0.72, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
     }
 
     function drawGrid() {
@@ -2644,9 +3151,9 @@
           if (type === TILE_TYPE.ROAD) ctx.fillStyle = COLORS.road;
           if (type === TILE_TYPE.ENTRANCE) ctx.fillStyle = COLORS.entrance;
           if (type === TILE_TYPE.CORE) ctx.fillStyle = COLORS.core;
-          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          ctx.fillRect(boardX(x), boardY(y), TILE, TILE);
           ctx.strokeStyle = COLORS.grid;
-          ctx.strokeRect(x * TILE + 0.5, y * TILE + 0.5, TILE - 1, TILE - 1);
+          ctx.strokeRect(boardX(x) + 0.5, boardY(y) + 0.5, TILE - 1, TILE - 1);
 
           if (type === TILE_TYPE.ENTRANCE) drawTileLabel("入", x, y);
           if (type === TILE_TYPE.CORE) drawTileLabel("核", x, y);
@@ -2659,22 +3166,95 @@
       ctx.fillStyle = COLORS.path;
       for (const pos of previewPath) {
         if (isSame(pos, core)) continue;
-        ctx.fillRect(pos.x * TILE + 8, pos.y * TILE + 8, TILE - 16, TILE - 16);
+        ctx.fillRect(boardX(pos.x) + 8, boardY(pos.y) + 8, TILE - 16, TILE - 16);
       }
     }
 
+    function isPlacePreviewAction(action) {
+      return ["dig", "block", "slime", "archer", "poisonBog", "hero", "core"].includes(action);
+    }
+
+    function canPreviewActionAt(action, x, y) {
+      if (!isInside(x, y)) return false;
+      const type = grid[y][x];
+      if (action === "dig") return type === TILE_TYPE.WALL && !isBorderTile(x, y);
+      if (action === "block") return type === TILE_TYPE.ROAD && !unitAt(x, y);
+      if (action === "core") return type === TILE_TYPE.ROAD && !unitAt(x, y);
+      if (action === "slime" || action === "archer" || action === "poisonBog" || action === "hero") {
+        return type === TILE_TYPE.ROAD && !isNearEntrance(x, y, 5) && !monsterAt(x, y) && !poisonBogAt(x, y) && !enemyAt(x, y);
+      }
+      return false;
+    }
+
+    function drawHoverMarker() {
+      if (!hoverCell || !isPlacePreviewAction(selectedAction)) return;
+      if (!isInside(hoverCell.x, hoverCell.y)) return;
+      const marker = selectedAction === "core"
+        ? GAME_ASSETS.ui.markerCoreMove
+        : canPreviewActionAt(selectedAction, hoverCell.x, hoverCell.y)
+          ? GAME_ASSETS.ui.markerPlaceOk
+          : GAME_ASSETS.ui.markerPlaceNo;
+      drawAsset(marker, boardX(hoverCell.x), boardY(hoverCell.y));
+    }
+
     function drawPlacementPreview() {
-      if (!hoverCell || (selectedAction !== "archer" && selectedAction !== "hero")) return;
+      if (!hoverCell || (selectedAction !== "archer" && selectedAction !== "poisonBog" && selectedAction !== "hero")) return;
       if (!isInside(hoverCell.x, hoverCell.y) || grid[hoverCell.y][hoverCell.x] !== TILE_TYPE.ROAD) return;
-      const cx = hoverCell.x * TILE + TILE / 2;
-      const cy = hoverCell.y * TILE + TILE / 2;
+      const cx = cellCenterX(hoverCell.x);
+      const cy = cellCenterY(hoverCell.y);
       ctx.beginPath();
-      const range = selectedAction === "hero" ? settings.heroAllyHealRange : settings.archerRange;
+      const range = selectedAction === "hero" ? settings.heroAllyHealRange : selectedAction === "poisonBog" ? settings.poisonBogRange : settings.archerRange;
       ctx.arc(cx, cy, range * TILE, 0, Math.PI * 2);
-      ctx.strokeStyle = selectedAction === "hero" ? "rgba(255, 122, 217, 0.68)" : "rgba(215, 180, 90, 0.65)";
+      ctx.strokeStyle = selectedAction === "hero" ? "rgba(255, 122, 217, 0.68)" : selectedAction === "poisonBog" ? "rgba(182, 255, 40, 0.7)" : "rgba(215, 180, 90, 0.65)";
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.lineWidth = 1;
+    }
+
+    function drawPoisonBogAuras() {
+      for (const bog of poisonBogs) {
+        const cx = cellCenterX(bog.x);
+        const cy = cellCenterY(bog.y);
+        const pulse = ((bog.pulse || 0) % 1.4) / 1.4;
+        const radius = settings.poisonBogRange * TILE;
+        ctx.save();
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = "#b6ff28";
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 0.42 * (1 - pulse);
+        ctx.strokeStyle = "#d8ff5b";
+        ctx.lineWidth = 2 + pulse * 4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * (0.82 + pulse * 0.18), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function drawPoisonBogs() {
+      for (const bog of poisonBogs) {
+        const cx = cellCenterX(bog.x);
+        const footY = cellCenterY(bog.y) + TILE * 0.42;
+        const drawSize = 130;
+        drawUnitShadow(cx, footY, drawSize);
+        const asset = GAME_ASSETS.units.poisonBog;
+        const top = footY - drawSize * 0.82;
+        const left = cx - drawSize / 2;
+        if (assetReady(asset)) {
+          ctx.drawImage(asset, left, top, drawSize, drawSize);
+          if (bog.flash > 0) {
+            ctx.save();
+            ctx.globalAlpha = 0.35;
+            ctx.fillStyle = "#d8ff5b";
+            ctx.fillRect(left, top, drawSize, drawSize);
+            ctx.restore();
+          }
+        } else {
+          drawUnitFallbackBody(cx, footY - drawSize * 0.34, "#8abc2f", "毒", 18, "#d8ff5b");
+        }
+      }
     }
 
     function drawTileLabel(text, x, y) {
@@ -2682,18 +3262,206 @@
       ctx.font = "bold 20px Microsoft JhengHei, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(text, x * TILE + TILE / 2, y * TILE + TILE / 2);
+      ctx.fillText(text, cellCenterX(x), cellCenterY(y));
+    }
+
+    function getEnemyAsset(enemy) {
+      if (enemy.type === "rogue") return GAME_ASSETS.units.enemyRogue;
+      if (enemy.type === "brute") return GAME_ASSETS.units.enemyBrute;
+      if (enemy.type === "enemyHeroPriest") return GAME_ASSETS.units.enemyHeroPriest;
+      return GAME_ASSETS.units.enemySoldier;
+    }
+
+    function getUnitAnchor(unit) {
+      let cx = cellCenterX(unit.x);
+      let cy = cellCenterY(unit.y) + TILE * 0.32;
+      const stack = [...monstersAt(unit.x, unit.y), ...enemiesAt(unit.x, unit.y)];
+      if (stack.length > 1) {
+        const index = Math.max(0, stack.indexOf(unit));
+        const angle = (Math.PI * 2 * index) / stack.length - Math.PI / 2;
+        const radius = Math.min(24, 8 + stack.length * 4);
+        cx += Math.cos(angle) * radius;
+        cy += Math.sin(angle) * radius * 0.45;
+      }
+      return { cx, cy };
+    }
+
+    function drawHealthBar(unit, cx, y, width = 54) {
+      const ratio = Math.max(0, unit.hp / unit.maxHp);
+      ctx.fillStyle = "#17151a";
+      ctx.fillRect(cx - width / 2, y, width, 5);
+      ctx.fillStyle = ratio > 0.45 ? "#45b86c" : "#d84f5f";
+      ctx.fillRect(cx - width / 2, y, width * ratio, 5);
+    }
+
+    function drawUnitShadow(cx, footY, drawSize) {
+      ctx.save();
+      ctx.globalAlpha = 0.34;
+      ctx.fillStyle = "#2a1c17";
+      ctx.beginPath();
+      ctx.ellipse(cx, footY + drawSize * 0.02, drawSize * 0.34, drawSize * 0.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function getSpriteBounds(unit) {
+      if (unit === alliedHero) return { minY: 9, maxY: 119 };
+      if (archers.includes(unit)) return { minY: 18, maxY: 110 };
+      if (slimes.includes(unit)) return { minY: 11, maxY: 117 };
+      if (unit.type === "brute") return { minY: 14, maxY: 114 };
+      if (unit.type === "enemyHeroPriest") return { minY: 9, maxY: 119 };
+      if (unit.type === "rogue") return { minY: 9, maxY: 118 };
+      return { minY: 9, maxY: 119 };
+    }
+
+    function getAssetBaseFacing(unit) {
+      return unit.type ? -1 : 1;
+    }
+
+    function drawUnitFallbackBody(cx, cy, color, label, size, outline) {
+      if (outline) {
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, size + 3, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(cx, cy, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px Microsoft JhengHei, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, cx, cy + 1);
+    }
+
+    function drawAssetUnit(unit, color, label, asset, size = 16, outline = null, assetSize = null) {
+      const { cx, cy: footY } = getUnitAnchor(unit);
+      const drawSize = assetSize || (size >= 19 ? 60 : 48);
+      const bounds = getSpriteBounds(unit);
+      const top = footY - drawSize * (bounds.maxY / 128);
+      const left = cx - drawSize / 2;
+      const visibleTop = top + drawSize * (bounds.minY / 128);
+      const visualCenterY = (visibleTop + footY) / 2;
+
+      drawUnitShadow(cx, footY, drawSize);
+
+      if (outline) {
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, visualCenterY, drawSize * 0.43, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+
+      if (assetReady(asset)) {
+        const shouldFlip = (unit.facing || 1) !== getAssetBaseFacing(unit);
+        ctx.save();
+        if (shouldFlip) {
+          ctx.translate(cx, 0);
+          ctx.scale(-1, 1);
+          ctx.drawImage(asset, -drawSize / 2, top, drawSize, drawSize);
+        } else {
+          ctx.drawImage(asset, left, top, drawSize, drawSize);
+        }
+        ctx.restore();
+        if (unit.flash > 0) {
+          ctx.globalAlpha = 0.42;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(left, top, drawSize, drawSize);
+          ctx.globalAlpha = 1;
+        }
+        if (unit.poisoned) {
+          ctx.save();
+          ctx.globalAlpha = 0.34;
+          ctx.fillStyle = "#8cff2e";
+          ctx.beginPath();
+          ctx.ellipse(cx, visualCenterY, drawSize * 0.36, drawSize * 0.45, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 0.7;
+          ctx.strokeStyle = "#d8ff5b";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx, visibleTop + 8, 4 + Math.sin(performance.now() / 130) * 1.5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      } else {
+        drawUnitFallbackBody(cx, visualCenterY, unit.flash > 0 ? "#ffffff" : color, label, size, outline);
+      }
+
+      drawHealthBar(unit, cx, visibleTop - 12, Math.min(82, Math.max(52, drawSize * 0.58)));
+    }
+
+    function drawAssetUnits() {
+      for (const slime of slimes) {
+        drawAssetUnit(slime, COLORS.slime, "S", GAME_ASSETS.units.allySlime, 16, null, 62);
+      }
+      for (const archer of archers) {
+        drawAssetUnit(archer, COLORS.archer, "A", GAME_ASSETS.units.allyArcher, 16, null, 68);
+      }
+      if (alliedHero) {
+        drawAssetUnit(alliedHero, COLORS.alliedHero, "H", GAME_ASSETS.units.allyHeroAil, 19, "#ffe7fb", 78);
+      }
+      for (const enemy of enemies) {
+        const enemyAssetSize = enemy.type === "brute" ? 74 : enemy.isHero ? 76 : 62;
+        drawAssetUnit(enemy, enemy.color, enemy.label, getEnemyAsset(enemy), enemy.isHero ? 19 : 16, enemy.isHero ? "#fff7c2" : null, enemyAssetSize);
+      }
+    }
+
+    function getEnemyAssetSize(enemy) {
+      if (enemy.type === "brute") return 112;
+      if (enemy.isHero) return 116;
+      return 92;
+    }
+
+    function drawAssetUnits() {
+      const renderItems = [];
+      for (const slime of slimes) {
+        renderItems.push({ unit: slime, color: COLORS.slime, label: "S", asset: GAME_ASSETS.units.allySlime, size: 16, outline: null, assetSize: 90 });
+      }
+      for (const archer of archers) {
+        renderItems.push({ unit: archer, color: COLORS.archer, label: "A", asset: GAME_ASSETS.units.allyArcher, size: 16, outline: null, assetSize: 100 });
+      }
+      if (alliedHero) {
+        renderItems.push({ unit: alliedHero, color: COLORS.alliedHero, label: "H", asset: GAME_ASSETS.units.allyHeroAil, size: 19, outline: "#ffe7fb", assetSize: 120 });
+      }
+      for (const enemy of enemies) {
+        renderItems.push({
+          unit: enemy,
+          color: enemy.color,
+          label: enemy.label,
+          asset: getEnemyAsset(enemy),
+          size: enemy.isHero ? 19 : 16,
+          outline: enemy.isHero ? "#fff7c2" : null,
+          assetSize: getEnemyAssetSize(enemy),
+        });
+      }
+
+      renderItems.sort((a, b) => {
+        if (a.unit.y !== b.unit.y) return a.unit.y - b.unit.y;
+        if (a.unit.x !== b.unit.x) return a.unit.x - b.unit.x;
+        return (a.assetSize || 0) - (b.assetSize || 0);
+      });
+
+      for (const item of renderItems) {
+        drawAssetUnit(item.unit, item.color, item.label, item.asset, item.size, item.outline, item.assetSize);
+      }
     }
 
     function drawUnits() {
       for (const slime of slimes) {
-        drawUnit(slime, COLORS.slime, "史");
+        drawUnit(slime, COLORS.slime, "S");
       }
       for (const archer of archers) {
-        drawUnit(archer, COLORS.archer, "弓");
+        drawUnit(archer, COLORS.archer, "A");
       }
       if (alliedHero) {
-        drawUnit(alliedHero, COLORS.alliedHero, "艾", 19, "#ffe7fb");
+        drawUnit(alliedHero, COLORS.alliedHero, "H", 19, "#ffe7fb");
       }
       for (const enemy of enemies) {
         drawUnit(enemy, enemy.color, enemy.label, enemy.isHero ? 19 : 16, enemy.isHero ? "#fff7c2" : null);
@@ -2701,8 +3469,8 @@
     }
 
     function drawUnit(unit, color, label, size = 16, outline = null) {
-      let cx = unit.x * TILE + TILE / 2;
-      let cy = unit.y * TILE + TILE / 2;
+      let cx = cellCenterX(unit.x);
+      let cy = cellCenterY(unit.y);
       const stack = [...monstersAt(unit.x, unit.y), ...enemiesAt(unit.x, unit.y)];
       if (stack.length > 1) {
         const index = Math.max(0, stack.indexOf(unit));
@@ -2770,29 +3538,19 @@
     }
 
     canvas.addEventListener("click", (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = Math.floor(((event.clientX - rect.left) * scaleX) / TILE);
-      const y = Math.floor(((event.clientY - rect.top) * scaleY) / TILE);
+      const { x, y } = eventToCell(event);
       handleTileClick(x, y);
     });
 
     canvas.addEventListener("mousemove", (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      hoverCell = {
-        x: Math.floor(((event.clientX - rect.left) * scaleX) / TILE),
-        y: Math.floor(((event.clientY - rect.top) * scaleY) / TILE),
-      };
+      hoverCell = eventToCell(event);
     });
 
     canvas.addEventListener("mouseleave", () => {
       hoverCell = null;
     });
 
-    [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn, ui.heroBtn, ui.coreBtn].forEach((button) => {
+    [ui.digBtn, ui.blockBtn, ui.slimeBtn, ui.archerBtn, ui.poisonBogBtn, ui.heroBtn, ui.coreBtn].forEach((button) => {
       button.addEventListener("click", () => selectAction(button.dataset.action));
     });
     ui.startBtn.addEventListener("click", startAttack);
